@@ -10,14 +10,20 @@ You turn **one capability's** already-approved design (`spec.md` + `plan.md` + `
 
 ## Where this fits
 
-- **Input**: `specs/<domain>/<NNN>-<slug>/{spec.md,plan.md,tasks.md,architecture.md}` — read-only to you, written by the Designer skill's agents. `tasks.md` is your worklist; `architecture.md` is the artifact map (which classes, components, objects, and how they connect); `spec.md`'s acceptance scenarios are what the deploy-gate must ultimately prove.
+- **Input**: the capability's entire `specs/<domain>/<NNN>-<slug>/` folder — `spec.md`, `plan.md`, `tasks.md`, `architecture.md`, `prototype/`, and anything else present — read-only to you, written by the Designer skill's agents. `tasks.md` is your worklist; `architecture.md` is the artifact map (which classes, components, objects, and how they connect); `spec.md`'s acceptance scenarios are what the deploy-gate must ultimately prove; `plan.md` and `prototype/` are what `fsc-lwc-developer`/`fsc-omnistudio-developer` need to build the production counterpart correctly. Treat the folder as a whole, not as four files you happen to know the names of.
 - **Output**: real SFDX metadata under `force-app/domains/<domain>/main/default/` (see root `README.md` for the project layout), deployed to the target org, plus a `specs/<domain>/<NNN>-<slug>/build-report.md` recording what was built and the deploy-gate's evidence.
 - **This repo installs alongside Salesforce Journey Designer in the same project** — same `specs/`, same `docs/sdd/DOMAINS.md`/`BACKLOG.md`. You read the domain/backlog files the same way the Designer's orchestrator does; you don't maintain a separate copy.
 
 ## Lifecycle you run per capability
 
 1. **Resolve domain + capability**, same as the Designer's orchestrator — confirm it exists in `docs/sdd/BACKLOG.md` under the right domain. If the backlog status isn't at least `pronto para build` (spec+plan+prototype+tech-plan all done), stop and say so — building ahead of an unapproved design just creates rework.
-2. **Read `tasks.md` and `architecture.md`** in full. Build the sequence: for a `_fundacao/` capability, that's data model only; for a product-domain capability, it's whatever mix of Apex/LWC/OmniStudio/Flow the plan calls for — never assume, read the actual task list.
+2. **Inventory and read 100% of `specs/<domain>/<NNN>-<slug>/` before dispatching anything — never just `tasks.md`/`architecture.md`.** List the folder first (don't assume its shape from other capabilities), then read every file it contains:
+   - `tasks.md` and `architecture.md` — the worklist and artifact map, as above.
+   - `spec.md` — every acceptance scenario (including edge/error/empty/loading cases), since these are what `fsc-deploy-gate` and the specialists must ultimately prove, not just what `tasks.md` happens to enumerate.
+   - `plan.md` — the screen/step table and each step's padrão/customizado verdict; a task can silently under-specify a rule that's only stated here.
+   - `prototype/` in full — every component source file `fsc-lwc-developer`/`fsc-omnistudio-developer` will be replacing fixture data in, and `prototype/README.md`'s roteiro (the acceptance-scenario-to-screen mapping and the wiring the Designer skill's overlay used) — you cannot correctly sequence LWC/OmniStudio work without having actually looked at what was prototyped, not just its file list.
+   - Any other file present (a `build-report.md` from a prior partial build attempt, a note, a supporting doc) — a capability folder is never assumed to contain only the four canonical files; read whatever is actually there before deciding anything is out of scope.
+   A task or artifact-map entry that doesn't match what `spec.md`/`plan.md`/the prototype actually show is a gap to report, not something to silently resolve by trusting `tasks.md` alone. Build the specialist sequence from this full picture: for a `_fundacao/` capability, that's data model only; for a product-domain capability, it's whatever mix of Apex/LWC/OmniStudio/Flow the plan calls for.
 3. **Dispatch specialists in dependency order** (this mirrors `platform-metadata-deploy`'s own default deployment order — objects/fields before permission sets before Apex before Flow — so build order and deploy order don't fight each other):
    1. `fsc-data-model-developer` — if `tasks.md` has any custom object/field/permission-set work.
    2. `fsc-apex-developer` — service/selector/domain classes, triggers, invocable/queueable/batch, and their tests.
