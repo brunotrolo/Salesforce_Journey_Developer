@@ -1,6 +1,10 @@
 # Salesforce Journey Developer
 
 <p align="center">
+  <img src="assets/banner.svg" width="960" alt="Salesforce Journey Developer">
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/github/stars/brunotrolo/Salesforce_Journey_Developer?style=flat-square&color=00A1E0&label=stars" alt="Stars">
   <img src="https://img.shields.io/badge/agentes-7-04E1CB?style=flat-square" alt="7 agentes">
   <img src="https://img.shields.io/badge/skills-26-032D60?style=flat-square" alt="26 skills">
