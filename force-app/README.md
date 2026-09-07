@@ -10,10 +10,15 @@ force-app/
         classes/             # fsc-apex-developer
         triggers/             # fsc-apex-developer
         lwc/                  # fsc-lwc-developer
+        messageChannels/      # fsc-lwc-developer — Lightning Message Service, quando componentes irmaos (nao pai-filho) precisam se desacoplar
         omniStudio/           # fsc-omnistudio-developer — copia JSON versionada, NAO é metadado deployavel (ver nota abaixo)
+        flexipages/           # fsc-declarative-developer — montagem da Lightning Record Page (App Builder)
         flows/                # fsc-automation-developer
-        objects/              # fsc-data-model-developer
-        permissionsets/       # fsc-data-model-developer, fsc-apex-developer
+        objects/              # fsc-data-model-developer — inclui recordTypes dentro do proprio .object-meta.xml
+        namedCredentials/      # fsc-integration-developer
+        externalCredentials/   # fsc-integration-developer
+        platformEvents/        # fsc-integration-developer — eventos __e para consumo cross-domain
+        permissionsets/       # fsc-data-model-developer, fsc-apex-developer, fsc-integration-developer
 ```
 
 **Por que por domínio, e não um `force-app/main/default/` único**: cada domínio é uma fronteira de deploy independente (o mesmo princípio de micro-frontend que a skill Designer já aplica ao UI) — isso é o padrão "modular architecture" que a própria Salesforce recomenda para orgs grandes, e evita a mesma super-customização acoplada que motivou esta migração. `sf project deploy start --source-dir force-app/domains/<domain>/main/default` deploya só o domínio que mudou; nunca use `--source-dir force-app` inteiro para o deploy normal de uma capacidade — isso reacoplaria os domínios no processo de deploy, mesmo eles sendo independentes no código.
