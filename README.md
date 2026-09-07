@@ -15,6 +15,11 @@ Constrói e deploya de verdade o que a skill irmã **[Salesforce Journey Designe
 
 **Instale no mesmo projeto que o Designer** — os dois compartilham `specs/`, `docs/sdd/DOMAINS.md` e `docs/sdd/BACKLOG.md`. O Designer nunca deploya nada real (seu protótipo roda com dados fictícios, localmente); este repositório é onde isso vira metadado de verdade.
 
+**Como funciona** — mesma separação de papéis que a skill irmã Designer usa, adaptada para build/deploy:
+- **Orquestração e decisão** (a sequência, o que é gap real vs. o que é ambiguidade a devolver ao Designer, o portão de evidência) → nossos **9 agentes autorais** em `.claude/agents/`. É aqui que mora o conhecimento do projeto; nada disto é importado.
+- **Craft técnico** (sintaxe de campo, template de Named Credential, comando exato de deploy/teste/scan) → as **28 skills importadas** em `.claude/skills/`, curadas de 4 repositórios open-source (ver `.claude/skills/README.md`). Um agente **consulta** uma skill por caminho quando precisa — a skill nunca decide nada sozinha, e por isso nenhuma delas aparece como comando `/`.
+- Duas exceções conhecidas a essa regra, documentadas nos próprios agentes: `fsc-build-orchestrator` não consome skill técnica nenhuma (é puro sequenciamento); `fsc-declarative-developer` não tem skill importada para Account Relationship Chart/Financial Accounts/Life Events (nenhum catálogo cobre a vertical FSC) — resolve com conhecimento de plataforma e memória de projeto (`memory: project`).
+
 ## Os 9 agentes
 
 | Agente | Papel |
