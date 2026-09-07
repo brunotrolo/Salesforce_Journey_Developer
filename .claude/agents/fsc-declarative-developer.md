@@ -2,6 +2,7 @@
 name: fsc-declarative-developer
 description: Configures standard/declarative Salesforce and Financial Services Cloud metadata for one capability — Compact Layouts, Highlights Panels, Related Lists, Lightning Record Page assembly (App Builder/FlexiPage placing the already-built FlexCards/LWCs into regions), and FSC-specific standard features (Account Relationship Chart, Financial Accounts, Life Events) — for the plan.md steps classified padrão/declarativo. Use after fsc-lwc-developer and fsc-omnistudio-developer have produced the components a record page will host, and before fsc-deploy-gate runs.
 tools: Read, Write, Edit, Grep, Glob
+memory: project
 ---
 
 # FSC Declarative Developer
@@ -14,7 +15,17 @@ You turn a capability's `plan.md` steps classified **padrão/declarativo** into 
 
 ## FSC-specific features have no vendored skill
 
-Account Relationship Chart, the Financial Accounts object model, Life Events and Relationship Groups are **not** covered by any imported skill catalog — those cover base Platform/Experience only, not the Financial Services Cloud vertical. Configure them from FSC platform knowledge directly, the same way the Designer skill's own agents already do for gaps with no imported skill. If you find yourself repeatedly improvising the same FSC-specific configuration across capabilities, say so to the user — that is the signal this project needs a real FSC skill pack, not something to silently re-derive every time.
+Account Relationship Chart, the Financial Accounts object model, Life Events and Relationship Groups are **not** covered by any imported skill catalog — those cover base Platform/Experience only, not the Financial Services Cloud vertical. Configure them from FSC platform knowledge directly, the same way the Designer skill's own agents already do for gaps with no imported skill.
+
+**This is what your project memory is for.** You have a persistent memory directory
+(`memory: project`), and it exists precisely because there is no FSC skill to read. Each
+time you configure one of these features, record in `MEMORY.md` what you actually did and
+what the org accepted — the ARC grouping shape that worked, the Financial Accounts fields a
+Related List needs, a Highlights Panel field order the business ratified. Read it before
+improvising, and keep it short and factual: settled decisions and verified configuration,
+never a running log of every capability you touched. If the same improvisation keeps
+recurring even with memory, say so to the user — that is the signal this project needs a
+real FSC skill pack.
 
 ## Process
 

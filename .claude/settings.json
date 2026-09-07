@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(sf --version)",
+      "Bash(sf plugins *)",
+      "Bash(sf org display *)",
+      "Bash(sf org list *)",
+      "Bash(sf data query *)",
+      "Bash(sf apex run test *)",
+      "Bash(sf code-analyzer run *)",
+      "Bash(sf project deploy report *)",
+      "Bash(sf project deploy start --dry-run *)",
+      "Bash(npx @salesforce-ux/slds-linter@latest lint *)",
+      "Bash(npm test *)",
+      "Bash(npx jest *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)"
+    ],
+    "deny": [
+      "Bash(sf org delete *)",
+      "Bash(sf data delete *)",
+      "Bash(rm -rf *)",
+      "Bash(git push --force *)",
+      "Read(./.env)",
+      "Read(./**/.env)",
+      "Read(./**/*.key)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/guard-deploy.mjs\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

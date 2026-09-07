@@ -1,6 +1,8 @@
 # Skills importadas
 
-Todas as skills usadas neste repositório vivem aqui, organizadas por origem. Nenhuma foi escrita do zero — são importações de repositórios open-source (licenças preservadas em cada subpasta).
+Todas as skills **importadas** vivem aqui, organizadas por origem. Nenhuma delas foi escrita do zero — são importações de repositórios open-source (licenças preservadas em cada subpasta).
+
+> **Como elas são usadas.** O Claude Code descobre comando `/` em `.claude/skills/<nome>/SKILL.md` — um nível só. Estas ficam um nível mais fundo, sob uma pasta de categoria (`salesforce/`, `agent-skills/`…), então **não aparecem no menu `/`** e não são auto-invocadas: são documentos de referência que os agentes leem por caminho explícito, no momento em que precisam. É de propósito — 28 skills no menu poluiriam sem ajudar, e o agente que precisa de cada uma já sabe qual é. As únicas skills invocáveis deste repositório são as autorais `fsc-build/` e `fsc-gate/`, na raiz de `skills/`.
 
 | Pasta | Origem | O que é |
 |---|---|---|

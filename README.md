@@ -46,17 +46,46 @@ Rode **de dentro da pasta do projeto onde o Designer já está instalado**:
 
 **Mac / Linux / Git Bash:**
 ```bash
-git clone --depth 1 https://github.com/brunotrolo/Salesforce_Journey_Developer.git .jd-tmp && cp -r .jd-tmp/.claude/. .claude/ && cp -rn .jd-tmp/force-app/. force-app/ 2>/dev/null; cp -n .jd-tmp/sfdx-project.json . 2>/dev/null; cp -n .jd-tmp/.forceignore . 2>/dev/null; rm -rf .jd-tmp
+git clone --depth 1 https://github.com/brunotrolo/Salesforce_Journey_Developer.git .jd-tmp && mkdir -p .claude && { [ -f .claude/settings.json ] && mv .claude/settings.json .claude/settings.json.anterior; :; } && cp -r .jd-tmp/.claude/. .claude/ && cp -rn .jd-tmp/force-app/. force-app/ 2>/dev/null; cp -n .jd-tmp/sfdx-project.json . 2>/dev/null; cp -n .jd-tmp/.forceignore . 2>/dev/null; rm -rf .jd-tmp
 ```
 
 **Windows (PowerShell):**
 ```powershell
-git clone --depth 1 https://github.com/brunotrolo/Salesforce_Journey_Developer.git .jd-tmp; Copy-Item -Recurse -Force .jd-tmp\.claude\* .claude\; if (-not (Test-Path force-app)) { Copy-Item -Recurse .jd-tmp\force-app . }; if (-not (Test-Path sfdx-project.json)) { Copy-Item .jd-tmp\sfdx-project.json . }; if (-not (Test-Path .forceignore)) { Copy-Item .jd-tmp\.forceignore . }; Remove-Item -Recurse -Force .jd-tmp
+git clone --depth 1 https://github.com/brunotrolo/Salesforce_Journey_Developer.git .jd-tmp; if (-not (Test-Path .claude)) { New-Item -ItemType Directory .claude | Out-Null }; if (Test-Path .claude\settings.json) { Move-Item -Force .claude\settings.json .claude\settings.json.anterior }; Copy-Item -Recurse -Force .jd-tmp\.claude\* .claude\; if (-not (Test-Path force-app)) { Copy-Item -Recurse .jd-tmp\force-app . }; if (-not (Test-Path sfdx-project.json)) { Copy-Item .jd-tmp\sfdx-project.json . }; if (-not (Test-Path .forceignore)) { Copy-Item .jd-tmp\.forceignore . }; Remove-Item -Recurse -Force .jd-tmp
 ```
 
-`-Force`/`cp -r` em `.claude/` é intencional: as skills daqui (`salesforce/`, `agent-skills/`, `mattpocock/`) são um superconjunto das do Designer — sobrescrever é um no-op para o que já existe e adiciona o resto. `force-app/`, `sfdx-project.json` e `.forceignore` só são copiados se ainda não existirem no projeto (não sobrescreve um projeto SFDX que você já tenha).
+`-Force`/`cp -r` em `.claude/` é intencional: agentes, skills e rules daqui são um superconjunto dos do Designer — sobrescrever é um no-op para o que já existe e adiciona o resto. **Exceção: `settings.json`.** Se você já tinha um, ele é preservado como `.claude/settings.json.anterior` — permissões e hooks são configuração sua, não nossa; abra os dois e junte o que fizer sentido. `force-app/`, `sfdx-project.json` e `.forceignore` só são copiados se ainda não existirem (não sobrescreve um projeto SFDX que você já tenha).
 
-Depois, abra o Claude Code na pasta do projeto — os 9 agentes carregam automaticamente junto com os do Designer.
+Depois, abra o Claude Code na pasta do projeto — os 9 agentes, as rules e os comandos `/` carregam automaticamente junto com os do Designer.
+
+## O que entra no seu `.claude/`
+
+| Caminho | O que faz | Quando carrega |
+|---|---|---|
+| `agents/` | Os 9 subagentes. Cada um roda na própria janela de contexto. | Quando despachados |
+| `rules/` | `journey-developer.md` (regras sempre válidas do projeto) + `apex.md`, `lwc.md`, `metadata.md`, escopadas por `paths:`. | A primeira no início da sessão; as outras só quando um arquivo que casa o glob entra em contexto |
+| `skills/fsc-build/`, `skills/fsc-gate/` | Os comandos `/fsc-build` e `/fsc-gate`. | Sob demanda, quando você digita |
+| `skills/salesforce/`, `agent-skills/`, `mattpocock/`, `unlazy/` | As 28 skills importadas. Ficam sob uma pasta de categoria, então **não são invocáveis por `/`** — são documentos de referência que os agentes leem por caminho, de propósito (carregar 28 skills no menu poluiria sem ajudar). | Quando um agente lê o `SKILL.md` que precisa |
+| `settings.json` + `hooks/` | Permissões (o que roda sem perguntar, o que é negado) e o guard de deploy. | Aplicados em toda chamada de ferramenta |
+| `agent-memory/` | Criado sozinho. Memória persistente do `fsc-declarative-developer`, que acumula configuração FSC por não existir skill da vertical. | Início de cada execução daquele agente |
+
+### Comandos
+
+| Comando | O que faz |
+|---|---|
+| `/fsc-build <domínio> <capacidade>` | Constrói e deploya uma capacidade inteira via `fsc-build-orchestrator`, com o portão obrigatório no fim. |
+| `/fsc-gate <domínio> <capacidade>` | Só re-roda o portão de evidência contra algo já construído: está mesmo deployado, testado e passando? |
+
+### O que o `settings.json` impede na prática
+
+Permissões cobrem o óbvio (`sf org delete`, `sf data delete`, `rm -rf`, `git push --force`, leitura de `.env`/`*.key` negados; comandos `sf` de leitura e os testes pré-aprovados). O hook `.claude/hooks/guard-deploy.mjs` cobre os quatro casos que **derrotariam o portão de evidência em silêncio** — e por isso são bloqueio, não prosa:
+
+- `--ignore-errors`/`--ignore-warnings` num deploy (esconde falha real);
+- `--test-level NoTestRun` num deploy de verdade (pula a evidência de teste);
+- `--source-dir force-app` inteiro (reacopla os domínios, que são fronteiras de deploy independentes);
+- `sf org delete` / `sf data delete`.
+
+Está em Node porque Node ≥20 já é pré-requisito e se comporta igual no Windows, Mac e Linux — um hook `.sh` não. Se o payload vier quebrado, ele sai em silêncio sem bloquear: um bug no guard nunca pode travar trabalho legítimo.
 
 ## Ciclo por capacidade
 
