@@ -10,13 +10,14 @@ force-app/
         classes/             # fsc-apex-developer
         triggers/             # fsc-apex-developer
         lwc/                  # fsc-lwc-developer
-        flexCards/            # fsc-omnistudio-developer
-        omniScripts/          # fsc-omnistudio-developer
+        omniStudio/           # fsc-omnistudio-developer — copia JSON versionada, NAO é metadado deployavel (ver nota abaixo)
         flows/                # fsc-automation-developer
         objects/              # fsc-data-model-developer
         permissionsets/       # fsc-data-model-developer, fsc-apex-developer
 ```
 
 **Por que por domínio, e não um `force-app/main/default/` único**: cada domínio é uma fronteira de deploy independente (o mesmo princípio de micro-frontend que a skill Designer já aplica ao UI) — isso é o padrão "modular architecture" que a própria Salesforce recomenda para orgs grandes, e evita a mesma super-customização acoplada que motivou esta migração. `sf project deploy start --source-dir force-app/domains/<domain>/main/default` deploya só o domínio que mudou; nunca use `--source-dir force-app` inteiro para o deploy normal de uma capacidade — isso reacoplaria os domínios no processo de deploy, mesmo eles sendo independentes no código.
+
+**FlexCard/OmniScript não são arquivo de metadado clássico**: `OmniUiCard` e `OmniProcess` são registros de sObject (criados via `sf data create record`/REST API, finalizados pelos scripts próprios das skills `omnistudio-flexcard-generate`/`omnistudio-omniscript-generate`), não arquivos `-meta.xml` sob `force-app/`. `omniStudio/*.json` aqui é só a cópia versionada da configuração que `fsc-omnistudio-developer` autorou — útil para diff/revisão em PR — não algo que `sf project deploy start --source-dir` consuma.
 
 `_fundacao/` (modelo de dados/segurança compartilhado, sem UI) não é um domínio de produto — seu metadado (objetos, campos, permission sets base) fica em `force-app/domains/_fundacao/main/default/`, e é o único domínio que os outros legitimamente dependem de deploy.
