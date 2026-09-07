@@ -7,7 +7,7 @@
 <p align="center">
   <img src="https://img.shields.io/github/stars/brunotrolo/Salesforce_Journey_Developer?style=flat-square&color=00A1E0&label=stars" alt="Stars">
   <img src="https://img.shields.io/badge/agentes-9-04E1CB?style=flat-square" alt="9 agentes">
-  <img src="https://img.shields.io/badge/skills-28-032D60?style=flat-square" alt="28 skills">
+  <img src="https://img.shields.io/badge/skills-26-032D60?style=flat-square" alt="26 skills">
   <img src="https://img.shields.io/badge/works%20with-Claude%20Code-032D60?style=flat-square" alt="Works with Claude Code">
 </p>
 
@@ -17,7 +17,7 @@ Constrói e deploya de verdade o que a skill irmã **[Salesforce Journey Designe
 
 **Como funciona** — mesma separação de papéis que a skill irmã Designer usa, adaptada para build/deploy:
 - **Orquestração e decisão** (a sequência, o que é gap real vs. o que é ambiguidade a devolver ao Designer, o portão de evidência) → nossos **9 agentes autorais** em `.claude/agents/`. É aqui que mora o conhecimento do projeto; nada disto é importado.
-- **Craft técnico** (sintaxe de campo, template de Named Credential, comando exato de deploy/teste/scan) → as **28 skills importadas** em `.claude/skills/`, curadas de 4 repositórios open-source (ver `.claude/skills/README.md`). Um agente **consulta** uma skill por caminho quando precisa — a skill nunca decide nada sozinha, e por isso nenhuma delas aparece como comando `/`.
+- **Craft técnico** (sintaxe de campo, template de Named Credential, comando exato de deploy/teste/scan) → as **26 skills importadas** em `.claude/skills/`, curadas de 4 repositórios open-source (ver `.claude/skills/README.md`). Um agente **consulta** uma skill por caminho quando precisa — a skill nunca decide nada sozinha, e por isso nenhuma delas aparece como comando `/`.
 - Duas exceções conhecidas a essa regra, documentadas nos próprios agentes: `fsc-build-orchestrator` não consome skill técnica nenhuma (é puro sequenciamento); `fsc-declarative-developer` não tem skill importada para Account Relationship Chart/Financial Accounts/Life Events (nenhum catálogo cobre a vertical FSC) — resolve com conhecimento de plataforma e memória de projeto (`memory: project`).
 
 ## Os 9 agentes
@@ -70,7 +70,7 @@ Depois, abra o Claude Code na pasta do projeto — os 9 agentes, as rules e os c
 | `agents/` | Os 9 subagentes. Cada um roda na própria janela de contexto. | Quando despachados |
 | `rules/` | `journey-developer.md` (regras sempre válidas do projeto) + `apex.md`, `lwc.md`, `metadata.md`, escopadas por `paths:`. | A primeira no início da sessão; as outras só quando um arquivo que casa o glob entra em contexto |
 | `skills/fsc-build/`, `skills/fsc-gate/` | Os comandos `/fsc-build` e `/fsc-gate`. | Sob demanda, quando você digita |
-| `skills/salesforce/`, `agent-skills/`, `mattpocock/`, `unlazy/` | As 28 skills importadas. Ficam sob uma pasta de categoria, então **não são invocáveis por `/`** — são documentos de referência que os agentes leem por caminho, de propósito (carregar 28 skills no menu poluiria sem ajudar). | Quando um agente lê o `SKILL.md` que precisa |
+| `skills/salesforce/`, `agent-skills/`, `mattpocock/`, `unlazy/` | As 26 skills importadas. Ficam sob uma pasta de categoria, então **não são invocáveis por `/`** — são documentos de referência que os agentes leem por caminho, de propósito (carregar 26 skills no menu poluiria sem ajudar). | Quando um agente lê o `SKILL.md` que precisa |
 | `settings.json` + `hooks/` | Permissões (o que roda sem perguntar, o que é negado) e o guard de deploy. | Aplicados em toda chamada de ferramenta |
 | `agent-memory/` | Criado sozinho. Memória persistente do `fsc-declarative-developer`, que acumula configuração FSC por não existir skill da vertical. | Início de cada execução daquele agente |
 
@@ -106,7 +106,7 @@ docs/sdd/BACKLOG.md atualizado + specs/<domínio>/<NNN>-<slug>/build-report.md
 
 Uma capacidade só é dada como "construída" quando `fsc-deploy-gate` reporta cada fase com evidência executável (job id do deploy, id da execução de teste, cobertura real, contagem de findings de scan) — nunca por um agente declarar "deveria funcionar" sem rodar o comando que prova isso.
 
-## Sobre as 28 skills importadas — resumo
+## Sobre as 26 skills importadas — resumo
 
 19 vêm de [`forcedotcom/sf-skills`](https://github.com/forcedotcom/sf-skills) (oficiais da Salesforce, Apache-2.0) — as 6 que o Designer já usa para prototipar, mais 13 novas específicas de build/deploy real (teste Apex, deploy via `sf`, scan estático, permission set, Flow, SOQL, modelo de dados, segurança/acessibilidade de LWC, integração/Named Credential/Platform Event, montagem de Lightning Record Page). As outras 9 (6 + 2 + 1) são disciplina de engenharia curada seletivamente de três repositórios que também inspiraram este projeto — [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills), [`mattpocock/skills`](https://github.com/mattpocock/skills) e [`Leonxlnx/unlazy`](https://github.com/Leonxlnx/unlazy) — nenhum deles é específico de Salesforce, então nenhum foi adotado por inteiro como dependência dos 9 agentes: de cada um foi curado só o subconjunto (ou, no caso do `unlazy`, só o princípio em prosa) que realmente reforça um pipeline de deploy real. A análise completa, skill por skill, está em [`.claude/skills/README.md`](.claude/skills/README.md).
 
