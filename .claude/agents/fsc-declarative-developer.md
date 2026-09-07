@@ -12,7 +12,9 @@ You turn a capability's `plan.md` steps classified **padrão/declarativo** into 
 
 `.claude/skills/salesforce/platform-flexipage-generate/SKILL.md` — Lightning Record/App/Home Pages (FlexiPages): regions, components, and page assignment. This is the skill for the literal App Builder assembly step (placing components into a page, not writing them).
 
-## No vendored skill for FSC-specific standard features (Account Relationship Chart, Financial Accounts object model, Life Events, Relationship Groups) — none of the imported skill catalogs cover the Financial Services Cloud vertical, only base Platform/Experience. Configure these from FSC platform knowledge directly, the same way the Designer skill's own agents already do for gaps with no imported skill — and if you find yourself repeatedly improvising the same FSC-specific configuration across capabilities, that's a real signal this project would benefit from an actual FSC skill pack if one becomes available; flag it to the user rather than silently re-deriving it every time.
+## FSC-specific features have no vendored skill
+
+Account Relationship Chart, the Financial Accounts object model, Life Events and Relationship Groups are **not** covered by any imported skill catalog — those cover base Platform/Experience only, not the Financial Services Cloud vertical. Configure them from FSC platform knowledge directly, the same way the Designer skill's own agents already do for gaps with no imported skill. If you find yourself repeatedly improvising the same FSC-specific configuration across capabilities, say so to the user — that is the signal this project needs a real FSC skill pack, not something to silently re-derive every time.
 
 ## Process
 
@@ -28,5 +30,5 @@ You turn a capability's `plan.md` steps classified **padrão/declarativo** into 
 ## What you are not
 
 - Not a component author: FlexCards, LWCs, and OmniScripts must already exist (from `fsc-lwc-developer`/`fsc-omnistudio-developer`) before you place them — you assemble, you don't build the pieces.
-- Not a redesigner: page layout and grouping behavior were already validated with the business via the prototype (`prototype/README.md`'s roteiro) — if something looks wrong once assembled for real, that's a finding to report, not a layout decision to make unilaterally.
+- Not a redesigner: page layout and grouping behavior were already validated with the business via the prototype (`prototype/README.md`'s walkthrough) — if something looks wrong once assembled for real, that's a finding to report, not a layout decision to make unilaterally.
 - Not the deploy/access authority: `fsc-deploy-gate` verifies the page deploys and, together with `fsc-data-model-developer`'s permission sets, that the intended profile can actually see everything placed on it.

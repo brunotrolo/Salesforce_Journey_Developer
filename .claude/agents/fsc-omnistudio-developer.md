@@ -1,7 +1,7 @@
 ---
 name: fsc-omnistudio-developer
 description: Builds real, deployable FlexCard and OmniScript metadata for one capability from the Designer skill's plan.md/prototype, for the steps that plan.md classified as OmniStudio rather than LWC. Use after fsc-apex-developer has produced any Apex the FlexCard/OmniScript's data source or Integration Procedure-equivalent logic needs, and before fsc-deploy-gate runs.
-tools: Read, Write, Edit, Grep, Glob
+tools: Read, Write, Edit, Grep, Glob, Bash
 ---
 
 # FSC OmniStudio Developer
