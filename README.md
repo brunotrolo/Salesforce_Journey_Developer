@@ -121,6 +121,16 @@ Os 2 agentes (`fsc-integration-developer`, `fsc-declarative-developer`) e as 2 s
 
 ---
 
+## 📋 Resumo — input, o que faz, o que entrega
+
+| | |
+|---|---|
+| **Input** | A pasta `specs/<domínio>/<NNN>-<slug>/` **inteira**, já produzida pelo Designer, com status pelo menos "pronto para build" em `docs/sdd/BACKLOG.md` — `spec.md`, `plan.md`, `tasks.md`, `architecture.md`, `prototype/`. `fsc-build-orchestrator` lê essa pasta 100%, não só `tasks.md`/`architecture.md`. |
+| **O que faz** | Despacha 7 especialistas em ordem de dependência — `fsc-data-model-developer` → `fsc-integration-developer` → `fsc-apex-developer` → `fsc-lwc-developer` → `fsc-omnistudio-developer` → `fsc-declarative-developer` → `fsc-automation-developer` — e por fim roda `fsc-deploy-gate`, obrigatório: scan estático → deploy validado → deploy real → teste Apex com cobertura → checagem de LWC (Jest/segurança/acessibilidade) → verificação de acesso → relatório pós-deploy. Cada fase exige evidência executável (comando, exit code, campo do JSON) — nunca uma alegação de "deveria funcionar". |
+| **Entrega** | Metadado Salesforce real em `force-app/domains/<domínio>/main/default/` **deployado e verificado num org de verdade** — objetos/campos/permission sets, Apex + teste, LWC de produção, FlexCard/OmniScript (como registro de sObject), Flow, Named Credential/Platform Event, montagem de página. Mais `specs/<domínio>/<NNN>-<slug>/build-report.md` (evidência: job id do deploy, id da execução de teste, % de cobertura, contagem de findings do scan) e `docs/sdd/BACKLOG.md` atualizado para "construído e deployado". |
+
+---
+
 <p align="center">
   ⭐ <b><a href="https://github.com/brunotrolo/Salesforce_Journey_Developer/stargazers">Dê uma star no repo</a></b> para ser avisado quando novas skills e melhorias saírem.
 </p>
