@@ -13,11 +13,11 @@
 
   <rect width="960" height="260" rx="24" fill="url(#bg)"/>
 
-  <!-- journey glyph: three waypoints on a path, ending in a check inside a pin (built + verified, not just designed) -->
-  <g transform="translate(60 68)" fill="none" stroke="url(#accent)" stroke-width="6" stroke-linecap="round">
-    <path d="M8 108 C 40 108, 40 60, 76 60 S 112 12, 148 12" stroke-dasharray="1 20"/>
-    <circle cx="8" cy="108" r="9" fill="url(#accent)" stroke="none"/>
-    <circle cx="76" cy="60" r="9" fill="url(#accent)" stroke="none"/>
+  <!-- developer glyph: code brackets </> ending in a check inside a pin (real code, built + verified, not just designed) -->
+  <g transform="translate(60 68)" fill="none" stroke="url(#accent)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M40 8 L10 54 L40 100"/>
+    <path d="M50 104 L68 4" stroke-width="8"/>
+    <path d="M78 8 L108 54 L78 100"/>
     <path d="M148 -6 c16 0 28 12 28 27 0 20-28 47-28 47s-28-27-28-47c0-15 12-27 28-27z" fill="url(#accent)" stroke="none"/>
     <path d="M138 21 l7 7 14 -14" stroke="#032D60" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
