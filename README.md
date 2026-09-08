@@ -73,6 +73,7 @@ Depois, abra o Claude Code na pasta do projeto — os 9 agentes, as rules e os c
 | `skills/salesforce/`, `agent-skills/`, `mattpocock/`, `unlazy/` | As 26 skills importadas. Ficam sob uma pasta de categoria, então **não são invocáveis por `/`** — são documentos de referência que os agentes leem por caminho, de propósito (carregar 26 skills no menu poluiria sem ajudar). | Quando um agente lê o `SKILL.md` que precisa |
 | `settings.json` + `hooks/` | Permissões (o que roda sem perguntar, o que é negado) e o guard de deploy. | Aplicados em toda chamada de ferramenta |
 | `agent-memory/` | Criado sozinho. Memória persistente do `fsc-declarative-developer`, que acumula configuração FSC por não existir skill da vertical. | Início de cada execução daquele agente |
+| `skills/apex-test-loop/` *(condicional)* | Clonado sozinho pelo `fsc-deploy-gate` só quando um deploy falha por cobertura de Apex insuficiente (org Enterprise exige ≥75%) — ver `.claude/skills/README.md`. Não existe num clone limpo. | Quando o gate detecta esse tipo específico de falha |
 
 ### Comandos
 

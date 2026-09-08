@@ -10,6 +10,7 @@ Todas as skills **importadas** vivem aqui, organizadas por origem. Nenhuma delas
 | `agent-skills/` | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) (MIT) | Subconjunto curado: 4 das 26 skills do repositório, cada uma citada por nome num agente específico — ver tabela abaixo. |
 | `mattpocock/` | [mattpocock/skills](https://github.com/mattpocock/skills) (MIT) | Subconjunto curado: `diagnosing-bugs` e `code-review`, ambas citadas por nome — ver tabela abaixo. |
 | `unlazy/` | [Leonxlnx/unlazy](https://github.com/Leonxlnx/unlazy) (MIT) | Disciplina de conclusão baseada em evidência (gates com `CHECK:`/`EXPECT:`, nunca declarar "pronto" sem prova executável). Vendorizada como referência de método para `fsc-deploy-gate` — ver nota de uso abaixo, não é acionada por si só nas outras skills. |
+| `apex-test-loop/` *(condicional)* | [brunotrolo/Salesforce-Apex-Cover-Loop](https://github.com/brunotrolo/Salesforce-Apex-Cover-Loop) (MIT + Apache-2.0 nas skills que ela mesma embute) | **Não vem num clone limpo deste repositório.** `fsc-deploy-gate` clona sob demanda, só quando um deploy falha por cobertura de Apex insuficiente (comum em org Enterprise, que exige ≥75% no deploy) — ver a seção de remediação de cobertura no próprio agente. Diferente de tudo mais nesta pasta, fica um nível raso (`.claude/skills/apex-test-loop/SKILL.md`), então o Claude Code a descobre como um comando `/apex-test-loop` de verdade. |
 
 ## Skills Salesforce importadas (`salesforce/`)
 
