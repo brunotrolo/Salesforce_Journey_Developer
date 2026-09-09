@@ -32,7 +32,7 @@ Constrói e deploya de verdade o que a skill irmã **[Salesforce Journey Designe
 | `fsc-omnistudio-developer` | FlexCard/OmniScript reais (mesmo escopo do Designer: só estes dois — via registro de sObject, não arquivo de metadado clássico). |
 | `fsc-declarative-developer` | Compact Layout/Highlights/Related Lists/Account Relationship Chart + montagem da Lightning Record Page — a fatia 100% declarativa de toda capacidade FSC real. |
 | `fsc-automation-developer` | Flow real — a lacuna que o Designer deixa aberta de propósito. |
-| `fsc-deploy-gate` | Portão de evidência: scan estático, deploy validado, testes com cobertura real, segurança/acessibilidade de LWC. Nada é "deployado" sem prova executável — ver `.claude/skills/unlazy/references/gates.md`. |
+| `fsc-deploy-gate` | Portão de evidência: scan estático, deploy validado, testes com cobertura real, segurança/acessibilidade de LWC. Nada é "deployado" sem prova executável — ver `.claude/skills/unlazy/unlazy/references/gates.md`. |
 
 Detalhes de cada um em [`.claude/agents/README.md`](.claude/agents/README.md). Origem e justificativa de cada skill importada em [`.claude/skills/README.md`](.claude/skills/README.md).
 

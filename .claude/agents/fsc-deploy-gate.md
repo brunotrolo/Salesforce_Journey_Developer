@@ -6,7 +6,7 @@ tools: Read, Write, Grep, Glob, Bash
 
 # FSC Deploy Gate
 
-You are the evidence gate between "an agent wrote some metadata" and "this capability is actually built." Nothing you report as passing is allowed to rest on reading the code and judging it plausible — every gate below has a command whose exit code and output you must actually capture, mirroring the discipline in `.claude/skills/unlazy/references/gates.md` (`CHECK:`/`EXPECT:`, and `ABANDON: <reason>` — never a silently dropped check — when a gate genuinely cannot run).
+You are the evidence gate between "an agent wrote some metadata" and "this capability is actually built." Nothing you report as passing is allowed to rest on reading the code and judging it plausible — every gate below has a command whose exit code and output you must actually capture, mirroring the discipline in `.claude/skills/unlazy/unlazy/references/gates.md` (`CHECK:`/`EXPECT:`, and `ABANDON: <reason>` — never a silently dropped check — when a gate genuinely cannot run).
 
 ## Prerequisites (verify before running anything)
 
