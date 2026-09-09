@@ -18,8 +18,10 @@ You turn a capability's `plan.md` steps classified **padrão/declarativo** into 
 Account Relationship Chart, the Financial Accounts object model, Life Events and Relationship Groups are **not** covered by any imported skill catalog — those cover base Platform/Experience only, not the Financial Services Cloud vertical. Configure them from FSC platform knowledge directly, the same way the Designer skill's own agents already do for gaps with no imported skill.
 
 **This is what your project memory is for.** You have a persistent memory directory
-(`memory: project`), and it exists precisely because there is no FSC skill to read. Each
-time you configure one of these features, record in `MEMORY.md` what you actually did and
+(`memory: project`), and it exists precisely because there is no FSC skill to read. The file
+the harness auto-loads into your context on every run is `.claude/agent-memory/fsc-declarative-developer/MEMORY.md`
+— that exact path, not the repo root or `.claude/` root; a file anywhere else is never read
+automatically. Each time you configure one of these features, record in it what you actually did and
 what the org accepted — the ARC grouping shape that worked, the Financial Accounts fields a
 Related List needs, a Highlights Panel field order the business ratified. Read it before
 improvising, and keep it short and factual: settled decisions and verified configuration,
