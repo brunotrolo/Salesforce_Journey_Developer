@@ -38,3 +38,31 @@ Source of record: `.claude/agents/fsc-omnistudio-developer.md` ("Confirmed Apex 
 - `runtime_omnistudio:flexcard` only resolves cards placed via **App Builder
   drag-drop**; a `FlexiPage` XML deploy fails with "No card named '…' found".
 - Use `IsActive` (there is no `Status` column on `OmniUiCard`).
+
+## 4. Styling inside `mergeField` — CONFIRMED via DOM inspection (2026-09-09)
+
+- **`lightning-formatted-rich-text` (the runtime for a `Text`/`outputField` element)
+  strips every `style="..."` attribute from the HTML it renders.** The `mergeField`
+  HTML arrives intact and the tags/structure render (so `<div>` line breaks show up),
+  but any inline `style` is silently removed — the visible symptom is unstyled plain
+  text with correct structure, not a broken layout. **Never author `mergeField` HTML
+  with inline `style=`.** Confirmed by inspecting the rendered DOM, not inferred.
+- `globalCSS` on `OmniUiCard` did not visibly apply in this org either (untested
+  *why* — could be genuinely unsupported here, could be a shadow-DOM scoping issue
+  between the card's own stylesheet and `lightning-formatted-rich-text`'s render
+  boundary). Don't rely on it until someone confirms via DOM inspection that its
+  `<style>` tag is actually present and in scope.
+- **What to use instead:**
+  - **Real, verified SLDS utility classes** (`slds-text-title`, `slds-text-heading_small`,
+    `slds-text-color_weak`, `slds-text-color_success`, `slds-text-bold`,
+    `slds-p-top_x-small`, etc.) inside `mergeField`'s `class="..."` — these come from
+    the platform's own already-loaded stylesheet, so they don't depend on `globalCSS`
+    or the sanitizer letting anything custom through. **Verify every class name
+    against `design-systems-slds-apply`'s search scripts before using it** — a
+    plausible-looking class that doesn't exist just renders unstyled, the same
+    silent-failure shape as this whole bug.
+  - **Custom colors/values SLDS doesn't cover** (e.g. a brand gold `#f5a623`): put
+    the `<style>` block in the state's own `styleObject`, not inside a `mergeField`
+    — this is card configuration processed separately from the merge-field HTML
+    payload, so it isn't run through the same content sanitizer. Confirm this by
+    DOM inspection too before trusting it as settled.
