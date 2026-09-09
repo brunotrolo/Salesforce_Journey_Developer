@@ -15,6 +15,25 @@ You turn a capability's `tasks.md`/`architecture.md` Apex entries into real, pro
 3. `.claude/skills/agent-skills/test-driven-development/SKILL.md` — write the test's intent (positive, negative/exception, bulk, async/callout paths) before or alongside the implementation, not as an afterthought bolted on to satisfy a coverage number.
 4. `.claude/skills/agent-skills/security-and-hardening/SKILL.md` — every class in this project handles data covered by financial-services compliance; read this before authoring anything that touches user-supplied input, a callout to a third-party system, or stored personal/financial data, not just when something looks obviously sensitive.
 5. `.claude/skills/salesforce/integration-connectivity-generate/SKILL.md` — **only if this class calls an external system**: its callout-pattern guidance is for the calling-side Apex shape. `fsc-integration-developer` must have already created the Named Credential you call through (never hardcode an endpoint) (a shared `HttpCalloutService`-style wrapper that returns a typed fault DTO on timeout/5xx instead of throwing to the caller is the common, correct pattern — real capabilities routinely need this for 3+ external systems, each with its own timeout). Test every callout path with `Test.setMock(HttpCalloutMock.class, ...)` — a callout class with no mock-based test is untested by definition, since a live callout in a test context fails outright.
+6. **Apex Remote contract, only if this class is a FlexCard/OmniScript data source — the reverse direction from item 5, OmniStudio calling into your Apex, not your Apex calling out.** `.claude/skills/salesforce/omnistudio-flexcard-generate/SKILL.md` documents this data-source type as a single table row (`Apex Remote` / `ApexRemote` / "Custom Apex class invocation") with **no method signature, no interface name, no example** — it's written IP-first, and this project doesn't use Integration Procedures. Guessing the shape from that one line is what produces the trial-and-error the user reported; don't guess, use this contract:
+   - **This project targets "OmniStudio for Salesforce Core"** (no managed-package namespace on `OmniUiCard`/`OmniProcess`, matching how `fsc-omnistudio-developer` already references them). On Core, the class implements the standard `System.Callable` interface — **not** the legacy `VlocityOpenInterface2` from the Vlocity/Industries managed package:
+     ```apex
+     global with sharing class AccountSummaryRemote implements Callable {
+         global Object call(String action, Map<String, Object> args) {
+             Map<String, Object> input = (Map<String, Object>) args.get('input');
+             Map<String, Object> output = (Map<String, Object>) args.get('output');
+             // Map<String, Object> options = (Map<String, Object>) args.get('options');
+             if (action == 'getSummary') {
+                 output.put('records', /* real query/service result, never fixture data */);
+                 return true;
+             }
+             return false;
+         }
+     }
+     ```
+     The FlexCard/OmniScript side then configures `Apex Class = AccountSummaryRemote`, `Method Name = getSummary` (the `action` string) — `fsc-omnistudio-developer` wires that half; you only own that this class exists, compiles, and returns the shape its `PropertySetConfig` field bindings expect.
+   - **If the target org actually has the older managed package** (`vlocity_cmt`/`vlocity_ins` namespace visible in Setup, or an existing Apex Remote class in the codebase already implementing it), the contract is different — `global class X implements vlocity_cmt.VlocityOpenInterface2 { global Boolean invokeMethod(String methodName, Map<String,Object> inputMap, Map<String,Object> outMap, Map<String,Object> optionsMap) {...} }`. **Check which one applies before writing the class** (an existing Remote class in `force-app/domains/*/classes/`, or `sf org list` metadata for an OmniStudio managed package) — don't default to `Callable` blind if the org is on the legacy package, and don't mix the two contracts in one org.
+   - **Verify early, not after `fsc-omnistudio-developer` reports the card broken**: write a minimal one-field class first, wire it in the org, confirm the FlexCard/OmniScript actually receives real data from it, *then* build out the full response shape — this is a fast, cheap check against a contract this project has no vendored skill for, and it's exactly the kind of gap that turns into many rounds of trial-and-error when skipped.
 
 ## Process
 
