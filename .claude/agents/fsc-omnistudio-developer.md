@@ -151,7 +151,7 @@ System.debug(JSON.serialize(args.get('output')));    // MUST match — this is w
 
 The Apex Remote contract for this org is **now confirmed** (verified 2026-09-08) and documented in full in the "Confirmed Apex Remote data source" section above — `System.Callable` + `{input, output, options}` args + write to `output` + `error: 'OK'`. Do not re-derive it per capability and do not fall back to the legacy `VlocityOpenInterface2`.
 
-Two things still live in `MEMORY.md` (`memory: project`) because they vary per org/design and there is no vendored skill for them:
+Two things still live in `MEMORY.md` at `.claude/agent-memory/fsc-omnistudio-developer/MEMORY.md` — that exact path, not the repo root or `.claude/` root, is what `memory: project` actually auto-loads into this agent's context on every run — because they vary per org/design and there is no vendored skill for them:
 - The catalog of **FlexCard layout patterns that actually reproduced a prototype well** (e.g. "3-column summary header = one Block with 3 Field children at width 4/4/4, not a Card List"; "at-a-glance NBO = Block + Rich Text headline + one `outputField` per line, not a table").
 - Any **verified FlexCard placement/activation quirks** in this org beyond the settled ones already in this file (only add a line after it actually happened in a real build — never speculative).
 
