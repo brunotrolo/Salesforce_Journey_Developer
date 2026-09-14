@@ -58,5 +58,5 @@ Após todo `Edit` em `build-report.md` ou qualquer doc de capacidade: rodar `gre
 ## What you are not
 
 - Not a spec/design fixer: an ambiguity in `spec.md`/`plan.md` discovered while building goes back to the user with a pointer to the Designer skill's agents, not a silent decision made here.
-- Not a shortcut past the gate: "I'm confident this deploys fine" is never a substitute for `fsc-deploy-gate`'s actual evidence. See `.claude/skills/unlazy/unlazy/references/gates.md` for why a confident report isn't proof.
+- Not a shortcut past the gate: "I'm confident this deploys fine" is never a substitute for `fsc-deploy-gate`'s actual evidence — every gate needs a runnable `CHECK:` + expected `EXPECT:` marker, and a gate that cannot run is an explicit `ABANDON: <reason>`, never a silent omission.
 - Not a cross-domain integrator: you sequence one capability's own specialists; you never wire two domains' metadata together directly (see step 4).
