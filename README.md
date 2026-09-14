@@ -24,15 +24,15 @@ Constrói e deploya de verdade o que a skill irmã **[Salesforce Journey Designe
 
 | Agente | Papel |
 |---|---|
-| `fsc-build-orchestrator` | Ponto de entrada — lê 100% da pasta da capacidade, sequencia os especialistas, nunca declara "construído" sem o gate passar. |
-| `fsc-data-model-developer` | Objetos/campos/RecordTypes/permission sets reais. |
+| `fsc-build-orchestrator` | Ponto de entrada — lê 100% da pasta da capacidade, despacha especialistas com envelope estruturado `{capability-path, metadata-root, relevant-tasks, metadata-type}`, sequencia na ordem de dependência, nunca declara "construído" sem o gate passar. |
+| `fsc-data-model-developer` | Objetos/campos/RecordTypes/permission sets reais — **único autor de PS/PSG/CP** (padrão ODIN). |
 | `fsc-integration-developer` | Named Credentials/External Credentials/Platform Events — plumbing de integração que todo callout/evento cross-domain depende de existir antes. |
-| `fsc-apex-developer` | Apex de produção + teste — nunca um sem o outro, incluindo callouts com `HttpCalloutMock`. |
+| `fsc-apex-developer` | Apex de produção + teste — nunca um sem o outro, incluindo callouts com `HttpCalloutMock`. Padrões de teste do piloto (Recs 5–13, 16, 21, 22) inlineados. |
 | `fsc-lwc-developer` | LWC de produção com dados reais e Lightning Message Service (a contraparte do protótipo do Designer). |
-| `fsc-omnistudio-developer` | FlexCard/OmniScript reais (mesmo escopo do Designer: só estes dois — via registro de sObject, não arquivo de metadado clássico). |
-| `fsc-declarative-developer` | Compact Layout/Highlights/Related Lists/Account Relationship Chart + montagem da Lightning Record Page — a fatia 100% declarativa de toda capacidade FSC real. |
+| `fsc-omnistudio-developer` | FlexCard/OmniScript reais (mesmo escopo do Designer: só estes dois — via registro de sObject, não arquivo de metadado clássico). Contrato Apex Remote confirmado e documentado. |
+| `fsc-declarative-developer` | Compact Layout/Highlights/Related Lists/Account Relationship Chart + montagem da Lightning Record Page — a fatia 100% declarativa de toda capacidade FSC real. Memória de projeto para configurações FSC sem skill. |
 | `fsc-automation-developer` | Flow real — a lacuna que o Designer deixa aberta de propósito. |
-| `fsc-deploy-gate` | Portão de evidência: scan estático, deploy validado, testes com cobertura real, segurança/acessibilidade de LWC. Nada é "deployado" sem prova executável — ver a disciplina `CHECK:`/`EXPECT:`/`ABANDON:` inlineada no próprio agente. |
+| `fsc-deploy-gate` | Portão de evidência: scan estático → deploy validado → deploy real → teste Apex com cobertura → checagem de LWC → verificação de acesso. Relatório de falha estruturado `{phase, owning-agent, error-evidence}`. Disciplina `CHECK:`/`EXPECT:`/`ABANDON:` inlineada. |
 
 Detalhes de cada um em [`.claude/agents/README.md`](.claude/agents/README.md). Origem e justificativa de cada skill importada em [`.claude/skills/README.md`](.claude/skills/README.md).
 
@@ -81,18 +81,18 @@ Depois, abra o Claude Code na pasta do projeto — os 9 agentes, as rules e os c
 | Caminho | O que faz | Quando carrega |
 |---|---|---|
 | `agents/` | Os 9 subagentes. Cada um roda na própria janela de contexto. | Quando despachados |
-| `rules/` | `journey-developer.md` (regras sempre válidas do projeto) + `apex.md`, `lwc.md`, `metadata.md`, escopadas por `paths:`. | A primeira no início da sessão; as outras só quando um arquivo que casa o glob entra em contexto |
+| `rules/` | `journey-developer.md` (regras sempre válidas do projeto + contract de report dos especialistas) + `apex.md`, `lwc.md`, `metadata.md`, escopadas por `paths:`. | A primeira no início da sessão; as outras só quando um arquivo que casa o glob entra em contexto |
 | `skills/fsc-build/`, `skills/fsc-gate/` | Os comandos `/fsc-build` e `/fsc-gate`. | Sob demanda, quando você digita |
 | `skills/salesforce/`, `agent-skills/`, `mattpocock/` | As 24 skills importadas. Ficam sob uma pasta de categoria, então **não são invocáveis por `/`** — são documentos de referência que os agentes leem por caminho, de propósito (carregar 26 skills no menu poluiria sem ajudar). | Quando um agente lê o `SKILL.md` que precisa |
 | `settings.json` + `hooks/` | Permissões (o que roda sem perguntar, o que é negado) e o guard de deploy. | Aplicados em toda chamada de ferramenta |
-| `agent-memory/` | Criado sozinho. Memória persistente do `fsc-declarative-developer`, que acumula configuração FSC por não existir skill da vertical. | Início de cada execução daquele agente |
+| `agent-memory/` | Memória persistente de `fsc-declarative-developer` (ARC, Financial Accounts, Highlights Panel — configurações FSC sem skill importada) e `fsc-omnistudio-developer` (contrato Apex Remote confirmado, padrões de layout FlexCard, lifecycle de registros). | Início de cada execução daquele agente |
 | `skills/apex-test-loop/` *(condicional)* | Clonado sozinho pelo `fsc-deploy-gate` só quando um deploy falha por cobertura de Apex insuficiente (org Enterprise exige ≥75%) — ver `.claude/skills/README.md`. Não existe num clone limpo. | Quando o gate detecta esse tipo específico de falha |
 
 ### Comandos
 
 | Comando | O que faz |
 |---|---|
-| `/fsc-build <domínio> <capacidade>` | Constrói e deploya uma capacidade inteira via `fsc-build-orchestrator`, com o portão obrigatório no fim. |
+| `/fsc-build <domínio> <capacidade>` | Constrói e deploya uma capacidade inteira via `fsc-build-orchestrator`, com o portão obrigatório no fim. Sem args, lista domínios/capacidades do BACKLOG.md. |
 | `/fsc-gate <domínio> <capacidade>` | Só re-roda o portão de evidência contra algo já construído: está mesmo deployado, testado e passando? |
 | `/fsc-status` | Mostra onde cada capacidade está no pipeline SDD — o que está especificado, prototipado, pronto para build, e o que está bloqueado. |
 
@@ -105,18 +105,93 @@ Permissões cobrem o óbvio (`sf org delete`, `sf data delete`, `rm -rf`, `git p
 - `--source-dir force-app` inteiro (reacopla os domínios, que são fronteiras de deploy independentes);
 - `sf org delete` / `sf data delete`.
 
+Comandos de mutação real (`sf project deploy start` sem `--dry-run`, `sf data create record`, `sf org assign permset`) disparam prompt de permissão — são checkpoints humanos na mutação do org, não falhas. Leitura, dry-run, scans e testes são pré-aprovados.
+
 Está em Node porque Node ≥20 já é pré-requisito e se comporta igual no Windows, Mac e Linux — um hook `.sh` não. Se o payload vier quebrado, ele sai em silêncio sem bloquear: um bug no guard nunca pode travar trabalho legítimo.
+
+## Como o orquestrador funciona internamente
+
+### Dispatch envelope
+
+Quando `fsc-build-orchestrator` despacha um especialista, ele passa um envelope estruturado — nunca só "leia architecture.md":
+
+```
+{
+  capability-path: specs/<domínio>/<NNN>-<slug>/,
+  metadata-root: force-app/domains/<domínio>/main/default/ (ou org-existente),
+  relevant-tasks: [...],        // filtrado do tasks.md para este especialista
+  relevant-objects: [...],      // objetos que este especialista precisa criar/modificar
+  metadata-type: file|record    // file = objetos/classes/LWC/Flow; record = FlexCard/OmniScript
+}
+```
+
+Cada especialista também declara o que **não** faz — permission sets são exclusividade de `fsc-data-model-developer`, Named Credentials de `fsc-integration-developer`, FlexCard placement de `fsc-declarative-developer`. Isso evita sobreposição de responsabilidades.
+
+### Report contract dos especialistas
+
+Todo especialista devolve um relatório estruturado com seções padronizadas:
+
+```markdown
+## Files Touched
+- force-app/domains/<domain>/main/default/classes/MyClass.cls
+- ...
+
+## Gaps Found
+- [NEEDS CLARIFICATION] architecture.md não especifica o tipo do campo X
+- ...
+
+## Decisions Made
+- Standard object <SObject> cobre o caso de uso; custom object rejeitado porque...
+- ...
+```
+
+O orquestrador lê `## Gaps Found` para decidir se routa ao usuário (gap bloqueante) ou continua (gap não-bloqueante registrado). Isso evita que sinais importantes se percam em prosa livre.
+
+### Pipeline status e recuperação
+
+Após cada especialista completar, o orquestrador appenda uma linha de status no `build-report.md`:
+
+```markdown
+## Pipeline Status
+- [x] data-model: done (3 objects, 2 fields, 1 PS)
+- [x] integration: done (2 Named Credentials, 1 Platform Event)
+- [ ] apex: pending
+```
+
+Se a sessão for interrompida no meio, é possível retomar de onde parou.
+
+### Iteration cap
+
+Se o mesmo especialista falhar no deploy-gate 3 vezes para o mesmo artifact, o orquestrador para e escala ao usuário com o build-report para intervenção manual — nunca loop infinito.
+
+### Failure routing
+
+Quando o gate falha, ele produz um relatório estruturado:
+
+```
+{
+  phase: "2-validate-deploy",
+  failing-artifact: "MyService.cls",
+  owning-agent: "fsc-apex-developer",
+  error-evidence: "Compile error: Method does not exist: AccountService.getById()",
+  suggested-fix: "Verificar se fsc-data-model-developer criou o campo ExtId__c"
+}
+```
+
+O orquestrador usa `owning-agent` para re-invocar o especialista correto. Falhas de infraestrutura (auth, conexão) roteiam ao usuário — o especialista não falhou, o ambiente falhou.
 
 ## Ciclo por capacidade
 
 ```
 specs/<domínio>/<NNN>-<slug>/ inteira    (produzida pelo Designer, já validada com o negócio)
         ↓
-modelo de dados → integração → Apex → LWC → OmniStudio → declarativo → Flow   (fsc-build-orchestrator sequencia)
+fsc-build-orchestrator: lê 100%, valida status, monta dispatch envelope
         ↓
-fsc-deploy-gate: scan → validar → deploy → testar → verificar acesso
-        ↓
-docs/sdd/BACKLOG.md atualizado + specs/<domínio>/<NNN>-<slug>/build-report.md
+modelo de dados → integração → Apex → LWC → OmniStudio → declarativo → Flow
+        ↓                                              (cada um com report contract)
+fsc-deploy-gate: scan → manifest check → validar → deploy → testar → verificar acesso
+        ↓                                              (failure report estruturado)
+docs/sdd/BACKLOG.md atualizado + build-report.md com pipeline status
 ```
 
 Uma capacidade só é dada como "construída" quando `fsc-deploy-gate` reporta cada fase com evidência executável (job id do deploy, id da execução de teste, cobertura real, contagem de findings de scan) — nunca por um agente declarar "deveria funcionar" sem rodar o comando que prova isso.
@@ -134,6 +209,15 @@ Os 2 agentes (`fsc-integration-developer`, `fsc-declarative-developer`) e as 2 s
 - **Lightning Message Service é o padrão real, não `@api`/eventos.** As duas jornadas desacoplam 5+ componentes irmãos (não pai-filho) via `messageChannel-meta.xml` — `CustomerInteractionChannel__c`, `PortoBank360Channel__c`. Isso não estava em nenhuma instrução do `fsc-lwc-developer` original.
 - **Gap real, sem skill disponível**: nenhum dos 3 catálogos importados (nem o oficial da Salesforce) cobre a vertical **Financial Services Cloud** especificamente — Account Relationship Chart, modelo de Financial Accounts, Life Events, Relationship Groups. `fsc-declarative-developer` documenta isso explicitamente e resolve com conhecimento de plataforma em prosa, mas se você tiver acesso a um pacote de skills oficial da Salesforce específico para FSC (Salesforce não publica um no `forcedotcom/sf-skills` até onde vimos), vale importar — é a lacuna mais concreta que resta.
 
+## Rodadas de consistência aplicadas
+
+Esta skill passou por múltiplas rodadas de análise de consistência com subagentes paralelos. Cada rodada identificou e corrigiu achados reais — não são melhorias teóricas, são correções baseadas em lições do piloto `resgate-smiles`:
+
+- **Rodada 1 (piloto → skill)**: Recs 7, 11, 16 inlineados no apex-developer para que um agente fresco aplique sem carregar 3 docs. Rec 14 agora exige evidência de chamada real HML no build-report.
+- **Rodada 2 (handoffs)**: dispatch envelope definido, report contract estruturado, failure routing mecânico, pipeline status para recovery.
+- **Rodada 3 (redundância)**: regras canonicas consolidadas em `journey-developer.md`, PS scope proibido em todos os agentes não-modelo.
+- **Rodada 4 (experience)**: validação de status, iteration cap, `/fsc-status` descobertável, handoff failure documentado no README.
+
 ---
 
 ## 📋 Resumo — input, o que faz, o que entrega
@@ -141,8 +225,8 @@ Os 2 agentes (`fsc-integration-developer`, `fsc-declarative-developer`) e as 2 s
 | | |
 |---|---|
 | **Input** | A pasta `specs/<domínio>/<NNN>-<slug>/` **inteira**, já produzida pelo Designer, com status pelo menos "pronto para build" em `docs/sdd/BACKLOG.md` — `spec.md`, `plan.md`, `tasks.md`, `architecture.md`, `prototype/`. `fsc-build-orchestrator` lê essa pasta 100%, não só `tasks.md`/`architecture.md`. |
-| **O que faz** | Despacha 7 especialistas em ordem de dependência — `fsc-data-model-developer` → `fsc-integration-developer` → `fsc-apex-developer` → `fsc-lwc-developer` → `fsc-omnistudio-developer` → `fsc-declarative-developer` → `fsc-automation-developer` — e por fim roda `fsc-deploy-gate`, obrigatório: scan estático → deploy validado → deploy real → teste Apex com cobertura → checagem de LWC (Jest/segurança/acessibilidade) → verificação de acesso → relatório pós-deploy. Cada fase exige evidência executável (comando, exit code, campo do JSON) — nunca uma alegação de "deveria funcionar". |
-| **Entrega** | Metadado Salesforce real em `force-app/domains/<domínio>/main/default/` **deployado e verificado num org de verdade** — objetos/campos/permission sets, Apex + teste, LWC de produção, FlexCard/OmniScript (como registro de sObject), Flow, Named Credential/Platform Event, montagem de página. Mais `specs/<domínio>/<NNN>-<slug>/build-report.md` (evidência: job id do deploy, id da execução de teste, % de cobertura, contagem de findings do scan) e `docs/sdd/BACKLOG.md` atualizado para "construído e deployado". |
+| **O que faz** | Despacha 7 especialistas com dispatch envelope estruturado em ordem de dependência — `fsc-data-model-developer` → `fsc-integration-developer` → `fsc-apex-developer` → `fsc-lwc-developer` → `fsc-omnistudio-developer` → `fsc-declarative-developer` → `fsc-automation-developer` — cada um com report contract padronizado. Por fim roda `fsc-deploy-gate`, obrigatório: scan estático → manifest completeness → deploy validado → deploy real → teste Apex com cobertura → checagem de LWC (Jest/segurança/acessibilidade) → verificação de acesso → relatório pós-deploy. Cada fase exige evidência executável (comando, exit code, campo do JSON); falhas produzem relatório estruturado `{phase, owning-agent, error-evidence}`. |
+| **Entrega** | Metadado Salesforce real em `force-app/domains/<domínio>/main/default/` **deployado e verificado num org de verdade** — objetos/campos/permission sets, Apex + teste, LWC de produção, FlexCard/OmniScript (como registro de sObject), Flow, Named Credential/Platform Event, montagem de página. Mais `specs/<domínio>/<NNN>-<slug>/build-report.md` (evidência + pipeline status) e `docs/sdd/BACKLOG.md` atualizado para "construído e deployado". |
 
 ---
 
