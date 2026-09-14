@@ -70,6 +70,15 @@ Para gravar histórico de operadores/ações em campo existente sem criar campo 
 **Rec 22 — Matrícula do operador via `FederationIdentifier`:**
 Resolver `User.FederationIdentifier` (campo corporativo). Fallback: `User.Id`. Registrar a decisão no `build-report.md` e não bloquear o build por campo administrativo indefinido.
 
+**Rec 7 — Resumo (detalhes em `nebula-logger-boas-praticas.md` §3.2):**
+Nunca chamar `Logger.info()/error()` **depois** do `saveLog()` da classe base — a entrada é perdida. Sempre `.setRecordId(caseId)` com ID Salesforce válido (não número de protocolo) antes de `saveLog()`. Erros de integração duplicar com vínculo no controller antes de re-lançar.
+
+**Rec 11 — Resumo (detalhe em `permissionamento-odin-v2.md` §Teste negativo):**
+Ao menos 1 teste negativo com `System.runAs(userSemPS)` provando que a restrição funciona — sem isso, o teste de permissão não está completo.
+
+**Rec 16 — Callout header assertion (obrigatório em toda classe que usa Named Credential):**
+Teste deve asserir ausência de headers manuais: `System.assertEquals(null, sent.getHeader('Authorization'))` e `System.assertEquals(null, sent.getHeader('Cookie'))`. Um callout com `Authorization` preenchido quando a auth é via Named Credential é um bug de segurança.
+
 ## Process
 
 1. Read `architecture.md` for this capability's Apex artifacts (which classes, their type, what they read/write) and `spec.md`'s acceptance scenarios (each one needs a corresponding test scenario — that's the actual acceptance proof, not just line coverage).

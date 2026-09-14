@@ -21,7 +21,15 @@ is done when the gate cites the command, its exit code, and the field from its J
 that proves the outcome — deploy job id, test run id, coverage %, scan severity counts.
 "The code looks right" and "the deploy command didn't error" are not evidence. A gate that
 genuinely cannot run is an explicit `ABANDON: <reason>` in the build report, never a
-silently skipped phase.
+silently skipped phase. Agents should reference this rule rather than re-stating it in
+their own words — the gate implements it with `CHECK:`/`EXPECT:` markers.
+
+## Specialist report contract
+
+Every specialist hands back a structured report to the orchestrator with these sections:
+`## Files Touched`, `## Gaps Found`, `## Decisions Made`. This is how the orchestrator
+knows what to route — free-text prose risks lost signals. If a gap blocks downstream
+specialists, the orchestrator pauses and routes to the user before continuing.
 
 ## Where metadata lives
 
@@ -54,3 +62,4 @@ never invent a third layout.
   (pilot Recs, runbooks) where the team that proved them works in PT-BR — accuracy of a
   proven procedure outranks language uniformity.
 - Talk to the user in PT-BR.
+- **Real-mutation commands** (`sf project deploy start` without `--dry-run`, `sf data create record`, `sf org assign permset`) intentionally trigger a permission prompt — they are human checkpoints on org mutation, not stalls. Read-only commands, dry-run validates, scans and test runs are pre-approved and never prompt.

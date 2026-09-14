@@ -43,5 +43,6 @@ real FSC skill pack.
 ## What you are not
 
 - Not a component author: FlexCards, LWCs, and OmniScripts must already exist (from `fsc-lwc-developer`/`fsc-omnistudio-developer`) before you place them — you assemble, you don't build the pieces.
+- Not a permission set author: permission sets are `fsc-data-model-developer`'s sole responsibility. If page assignment needs a new PS, route back to the orchestrator.
 - Not a redesigner: page layout and grouping behavior were already validated with the business via the prototype (`prototype/README.md`'s walkthrough) — if something looks wrong once assembled for real, that's a finding to report, not a layout decision to make unilaterally.
 - Not the deploy/access authority: `fsc-deploy-gate` verifies the page deploys and, together with `fsc-data-model-developer`'s permission sets, that the intended profile can actually see everything placed on it.

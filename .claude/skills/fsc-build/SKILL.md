@@ -17,6 +17,9 @@ Before dispatching, resolve what the user actually named:
 
 - If `$domain` or `$capability` is missing or ambiguous, list the candidates from
   `docs/sdd/BACKLOG.md` and ask which one, rather than guessing.
+  - If exactly one arg is provided, assume it's the domain and list capabilities under
+    that domain from BACKLOG.md, asking for the second arg.
+  - If zero args, list all domains from BACKLOG.md first.
 - If `docs/sdd/BACKLOG.md` doesn't exist at all, the Designer skill isn't installed (or
   you are outside the project folder) — say so and stop: there is no designed capability
   to build. Point the user at installing Salesforce Journey Designer first.

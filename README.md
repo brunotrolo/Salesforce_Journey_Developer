@@ -47,6 +47,19 @@ Detalhes de cada um em [`.claude/agents/README.md`](.claude/agents/README.md). O
 
 ## Como começar
 
+### O que o Designer entrega a você
+
+Antes de rodar `/fsc-build`, verifique que a capacidade em `docs/sdd/BACKLOG.md` tem
+status **"pronto para build"** — isso significa que `spec.md`, `plan.md`, `tasks.md`,
+`architecture.md` e `prototype/` existem e estão validados com o negócio. A pasta
+`specs/<domínio>/<NNN>-<slug>/` deve conter esses arquivos; `tasks.md` é a lista de
+trabalho e `architecture.md` é o mapa de artefatos. Se `tasks.md` ou `architecture.md`
+não existem, a capacidade ainda não está pronta para build — volte ao Designer.
+Veja o [README do Designer](https://github.com/brunotrolo/Salesforce_Journey_Designer)
+para o ciclo completo de status.
+
+### Instalação
+
 Rode **de dentro da pasta do projeto onde o Designer já está instalado**:
 
 **Mac / Linux / Git Bash:**
@@ -81,6 +94,7 @@ Depois, abra o Claude Code na pasta do projeto — os 9 agentes, as rules e os c
 |---|---|
 | `/fsc-build <domínio> <capacidade>` | Constrói e deploya uma capacidade inteira via `fsc-build-orchestrator`, com o portão obrigatório no fim. |
 | `/fsc-gate <domínio> <capacidade>` | Só re-roda o portão de evidência contra algo já construído: está mesmo deployado, testado e passando? |
+| `/fsc-status` | Mostra onde cada capacidade está no pipeline SDD — o que está especificado, prototipado, pronto para build, e o que está bloqueado. |
 
 ### O que o `settings.json` impede na prática
 
