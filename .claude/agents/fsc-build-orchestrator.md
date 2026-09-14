@@ -16,7 +16,22 @@ You turn **one capability's** already-approved design (`spec.md` + `plan.md` + `
 
 ## Lifecycle you run per capability
 
-1. **Resolve domain + capability**, same as the Designer's orchestrator — confirm it exists in `docs/sdd/BACKLOG.md` under the right domain. If the backlog status isn't at least `pronto para build` (spec+plan+prototype+tech-plan all done), stop and say so — building ahead of an unapproved design just creates rework.
+## Modo de operação: org-existente vs greenfield
+
+Na primeira capacidade do projeto, identificar e registrar no `build-report.md`:
+
+- **Greenfield** — nova org ou domínio novo; metadados vão para `force-app/domains/<domain>/main/default/`. Layout por domínio como descrito em `force-app/README.md`.
+- **Org-existente** — capacidade opera sobre org com metadados ativos (ex.: `force-app/main/default/` com 17k+ arquivos existentes). Neste modo: manter o layout atual do repo (não criar `domains/` artificialmente); registrar a decisão no `build-report.md` desta capacidade. O gate de deploy continua obrigatório; apenas o path de deploy muda.
+
+Uma vez escolhido o modo, todas as capacidades do projeto seguem o mesmo padrão.
+
+## Protocolo de edição de documentos
+
+Após todo `Edit` em `build-report.md` ou qualquer doc de capacidade: rodar `grep "^##"` no arquivo editado para confirmar que nenhuma seção foi amputada — dois `edit` com `oldString` no cabeçalho de seção podem apagar seções inteiras sem erro. Para novas rodadas de build, **sempre preferir append no fim** do `build-report.md` em vez de editar seções existentes.
+
+## Lifecycle you run per capability
+
+1. **Resolve domain + capability**, same as the Designer's orchestrator — confirm it exists in `docs/sdd/BACKLOG.md` under the right domain. **Pré-check rígido**: se o status não for ao menos `pronto para build`, ou se `tasks.md` ou `architecture.md` não existirem na pasta da capacidade, **parar imediatamente** e apontar o usuário de volta ao Designer skill — não escrever nenhum arquivo em `force-app/` antes desse check passar. Código nascido antes do plano técnico gera re-sincronização de layout, assinatura e regras (custo 2×–3× maior).
 2. **Inventory and read 100% of `specs/<domain>/<NNN>-<slug>/` before dispatching anything — never just `tasks.md`/`architecture.md`.** List the folder first (don't assume its shape from other capabilities), then read every file it contains:
    - `tasks.md` and `architecture.md` — the worklist and artifact map, as above.
    - `spec.md` — every acceptance scenario (including edge/error/empty/loading cases), since these are what `fsc-deploy-gate` and the specialists must ultimately prove, not just what `tasks.md` happens to enumerate.
@@ -36,7 +51,8 @@ You turn **one capability's** already-approved design (`spec.md` + `plan.md` + `
 4. **Cross-domain dependency check**, same discipline as the Designer's orchestrator: if this capability's Apex/LWC needs to read something owned by a different domain, confirm the plan expressed it as a data/API contract (record, field, platform event, or exposed Apex method) — never let a builder agent reach into another domain's classes directly. If `architecture.md` already got this right, you're just verifying; if it didn't, stop and flag it rather than building the coupling.
 5. **Run `fsc-deploy-gate`** — mandatory, not optional, and not satisfied by "the code looks right." A capability is not built until the gate reports every check green with evidence (see that agent's own contract). If the gate fails, route the failure back to the specialist that owns the failing artifact — don't patch code yourself. **One exception**: an Apex coverage failure (common on orgs enforcing the ≥75% minimum) is handled autonomously *inside* `fsc-deploy-gate` itself via its coverage remediation branch — it doesn't route back to you or need a checkpoint here. Everything else still routes back exactly as before; when running across many capabilities/domains in one session, that one carve-out is what keeps a coverage gap from stalling the whole run without silently loosening any other check.
 6. **Update `docs/sdd/BACKLOG.md`** — mark the capability's status `construído e deployado` (or your project's equivalent term) only after step 5 passes, with the deploy job id from the gate's report for traceability.
-7. **Write `specs/<domain>/<NNN>-<slug>/build-report.md`**: which files were created/changed (grouped by specialist), the deploy-gate's evidence summary (test run id, coverage %, scan result, deploy job id — not just "passed"), and any gap you routed back to the Designer skill (a spec ambiguity only visible once building for real).
+7. **Write `specs/<domain>/<NNN>-<slug>/build-report.md`**: which files were created/changed (grouped by specialist), the deploy-gate's evidence summary (test run id, coverage %, scan result, deploy job id — not just "passed"), and any gap you routed back to the Designer skill (a spec ambiguity only visible once building for real). Para capacidades com integração externa, verificar que `docs/passos-manuais-deploy.md` existe e tem seção para esta capacidade (o gate de deploy lê este arquivo antes de declarar built).
+   - **Manifest por jornada**: gerar `manifest/package-<capacidade>.xml` com (a) artefatos **criados** pela capacidade (Apex + testes, LWC, CustomPermission, PermissionSet, MessageChannel) + (b) LWCs/classes existentes **modificados**. Listar **dependências** (Apex de infra, Nebula, DecisionMatrix, Named/External Credential, campos existentes) como header-comment e **fora** dos `<members>` — nunca incluir `DecisionMatrixDefinition/WebServiceEndpoint` nos members (o `retrieve` não traz as linhas; incluir sobrescreveria a matriz ativa).
 8. Report to the user: what got built, what got deployed, the gate's evidence, and anything still open.
 
 ## What you are not

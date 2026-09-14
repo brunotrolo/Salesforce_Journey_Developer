@@ -35,12 +35,45 @@ You turn a capability's `tasks.md`/`architecture.md` Apex entries into real, pro
    - **If the target org actually has the older managed package** (`vlocity_cmt`/`vlocity_ins` namespace visible in Setup, or an existing Apex Remote class in the codebase already implementing it), the contract is different — `global class X implements vlocity_cmt.VlocityOpenInterface2 { global Boolean invokeMethod(String methodName, Map<String,Object> inputMap, Map<String,Object> outMap, Map<String,Object> optionsMap) {...} }`. **Check which one applies before writing the class** (an existing Remote class in `force-app/domains/*/classes/`, or `sf org list` metadata for an OmniStudio managed package) — don't default to `Callable` blind if the org is on the legacy package, and don't mix the two contracts in one org.
    - **Verify early, not after `fsc-omnistudio-developer` reports the card broken**: write a minimal one-field class first, wire it in the org, confirm the FlexCard/OmniScript actually receives real data from it, *then* build out the full response shape — this is a fast, cheap check against a contract this project has no vendored skill for, and it's exactly the kind of gap that turns into many rounds of trial-and-error when skipped.
 
+## Padrões obrigatórios de teste (validados no piloto resgate-smiles)
+
+**Rec 5 — 1 `Test.setMock` por método de teste:**
+Múltiplos `Test.setMock(HttpCalloutMock.class, ...)` no mesmo método de teste não são confiáveis — o 2º/3º chamado frequentemente cai em "sem mock" (callout bloqueado), disfarçado de falha de negócio. Padrão: **1 mock por método**. Quando um método de produção faz múltiplos callouts, quebrar em métodos de teste separados, cada um com seu próprio `setMock`.
+
+**Rec 8 — E2E manual: setup e chamada em execuções separadas:**
+Executar setup (DML de criação de registros de teste) e chamada do método em **transações separadas** no Developer Console/Apex Anônimo. Executar os dois no mesmo script gera "uncommitted work pending" (DML + callout na mesma transação) e — quando o método é `@AuraEnabled` — `AuraHandledException` em vez da mensagem de negócio real.
+
+**Rec 9 — Setup de Case exige protocolo em aberto:**
+Insert de `Case` em teste falha se a org tem automação que exige `ProtocolHumanAttendance` do mesmo usuário. Padrão: usar `CaseDataFactory` + criação de protocolo como receita-base para qualquer teste que envolva Case.
+
+**Rec 10 — Clonar registro de factory ao criar múltiplos no mesmo método:**
+Factory com campo `static` cacheado devolve o mesmo registro na segunda criação ("cannot specify Id in an insert call"). Sempre clonar: `factory.clone(false, false, false, false)` antes de inserir um segundo registro do mesmo tipo no mesmo método de teste.
+
+**Rec 11 — FLS em teste: admin + PS da capacidade:**
+Usuário Standard sem FLS quebra DML de campo custom. Usuário admin sem PS quebra o teste de permissão. Padrão: `System.runAs(adminUser)` com o Permission Set da capacidade atribuído cobre FLS e preserva a lógica de permissão. Manter ao menos 1 teste negativo com usuário sem PS para provar que a restrição funciona.
+
+**Rec 12 — Re-leitura e asserção pós-burn/close:**
+Todo update de `Status` ou burn de campo (ex.: fechar caso, gravar `TransactionId__c`) deve ser **re-lido com SOQL e asserido** no teste — nunca asserir só o retorno do método. Automações da org podem reverter o status em contextos não determinísticos. O re-read prova que o valor persistiu na org, não só que o método não lançou exceção.
+
+**Rec 13 — Parse defensivo de response body + null no Logger:**
+Manter parse tolerante (aliases, null-safe, envelope). Documentar que o Logger corporativo pode rejeitar corpos com campos `null` na raiz (ex.: `{"requestId": null}` falha antes do parse do Apex) — tratar `null` antes de passar ao Logger.
+
+**Rec 21 — Trilha de auditoria append-only em campo Text(500):**
+Para gravar histórico de operadores/ações em campo existente sem criar campo novo:
+- Tipo: `Text(500)` — **não** `LongTextArea`.
+- Formato: `[Jornada dd/MM/yyyy HH:mm:ss] <dados>\n` concatenado ao valor anterior.
+- Truncagem obrigatória no controller: quando nova entrada + valor atual ultrapassar 500 chars, preservar a nova entrada inteira + máximo possível da antiga com marcador `...[TRUNCADO]...`. O campo `Text(500)` lança `STRING_TOO_LONG` no DML se passar de 500.
+- Teste: provar preservação da nova entrada, teto de 500, e presença do marcador quando aplicável.
+
+**Rec 22 — Matrícula do operador via `FederationIdentifier`:**
+Resolver `User.FederationIdentifier` (campo corporativo). Fallback: `User.Id`. Registrar a decisão no `build-report.md` e não bloquear o build por campo administrativo indefinido.
+
 ## Process
 
 1. Read `architecture.md` for this capability's Apex artifacts (which classes, their type, what they read/write) and `spec.md`'s acceptance scenarios (each one needs a corresponding test scenario — that's the actual acceptance proof, not just line coverage).
 2. **Discover project conventions first**: existing classes/triggers in this domain's `force-app/domains/<domain>/main/default/classes/`, the trigger-handler pattern already in use, existing selectors/services to extend rather than duplicate.
 3. Author with guardrails from `platform-apex-generate`: `with sharing` by default, bulkified (no SOQL/DML inside a loop), CRUD/FLS-aware for any DML/query touching user-supplied context, governor-limit-safe for batch/async work.
-4. Author the test class immediately after (or alongside) the production class — cover positive path, negative/exception path, bulk path, and the callout/async path if the class has one. A class with 75%-by-accident coverage and no negative-path assertion is not done.
+4. Author the test class immediately after (or alongside) the production class — cover positive path, negative/exception path, bulk path, and the callout/async path if the class has one. A class with 75%-by-accident coverage and no negative-path assertion is not done. Apply all patterns in "Padrões obrigatórios de teste" above.
 5. **Local checks before handing off** (this capability's files only, not the whole repo):
    - `dx-code-analyzer-run` against every `.cls`/`.trigger` you touched — fix every High/Critical finding, or write down why it's a false positive; never silently suppress.
    - `.claude/skills/mattpocock/engineering/code-review/SKILL.md` — a second lens beyond the static scan: does the class actually match what `architecture.md`/`tasks.md` asked for, not just "does it pass the linter." Run it on what you just wrote before reporting done.

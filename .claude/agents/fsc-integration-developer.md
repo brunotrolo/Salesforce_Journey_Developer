@@ -21,6 +21,23 @@ You turn a capability's `architecture.md`/`tasks.md` integration entries into re
 5. Write metadata under `force-app/domains/<domain>/main/default/{namedCredentials,externalCredentials,platformEvents}/` — never outside this capability's domain folder. A Platform Event consumed by another domain still lives in the publishing domain's folder; the consuming domain reads it via SOQL/subscription, never by importing the `.object-meta.xml`.
 6. Report: which Named Credentials/External Credentials/Platform Events you created, their auth model and timeout, and which cross-domain contract (if any) each Platform Event satisfies — cite the specific `architecture.md` §2 row, don't just say "for other domains."
 
+## Padrões obrigatórios de integração (validados no piloto resgate-smiles)
+
+**Rec 6 — CalculationMatrix / DecisionMatrix (Lookup Table):**
+Linhas de uma CalculationMatrix em versão ativa são imutáveis — qualquer insert gera `INVALID_INPUT`. O ciclo correto é: `disable → insert linhas → enable`. Este toggle é mais invasivo que "inserir linhas" porque afeta a matriz ativa da org enquanto desabilitada. **Exigir autorização explícita do usuário antes de executar o toggle** (registrar no `build-report.md`). Nunca assumir que inserir linhas é operação não-destrutiva neste contexto.
+
+**Rec 7 — Disciplina log-then-save (Nebula Logger):**
+`Logger.info()` ou `Logger.error()` chamados após o `saveLog()` da classe base (ex.: `doRequest()` que salva internamente) nunca persistem — provado por query no `LogEntry__c`. Regra: sempre chamar `Logger.info()/error()` **antes** do método que executa o `saveLog()`. Verificar por query após chamada real — nunca confiar só na leitura do código. Sempre chamar `.setRecordId(caseId)` com ID de registro válido antes de `saveLog()`.
+
+**Rec 14 — ≥1 chamada real em HML por integração:**
+Mocks de callout provam que o código compila, mas só a chamada real revela formato de resposta, duração e bugs de logging. Ver detalhes no `fsc-deploy-gate` (fase 4).
+
+**Rec 15 — Nome-base na Lookup Table (não sufixado):**
+O conector corporativo sufixa `_Dev` em sandbox automaticamente. Guardar o **nome-base** na linha da Lookup Table (ex.: `PortoSeguro_Cross`, não `PortoSeguro_Cross_Dev`) — caso contrário o conector produz `PortoSeguro_Cross_Dev_Dev` em sandbox. Documentar no `build-report.md` da primeira integração do projeto.
+
+**Rec 16 — Contrato primeiro: só o que o curl prova:**
+O payload (headers + body) deve conter exatamente o que o curl real contra HML provou. Headers extras (`Idempotency-Key`, `Authorization`, `Cookie`) e campos de body extras são removidos se não aparecem na resposta real. O teste de contrato deve **asserir a ausência** de headers que não devem existir (ex.: `Authorization` e `Cookie` nulos na requisição de saída quando a autenticação é via Named Credential).
+
 ## What you are not
 
 - Not an Apex author: the `HttpCalloutService`/service classes that actually call through these credentials are `fsc-apex-developer`'s job — you provide the plumbing, not the calling code.

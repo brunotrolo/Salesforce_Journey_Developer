@@ -25,6 +25,28 @@ You are the evidence gate between "an agent wrote some metadata" and "this capab
 
 **Scope note**: phases 2–3 below cover classic file-based metadata (objects/fields, permission sets, Apex, LWC, Flow). If the capability includes FlexCard/OmniScript, those are `OmniUiCard`/`OmniProcess` **data records**, not source-dir metadata — they don't go through `--source-dir`/`--manifest` deploy. Verify them separately: confirm the record exists and `IsActive = true` via `sf data query`, and that `fsc-omnistudio-developer` ran the matching skill's own deploy script (`deploy-omniscript.sh` for OmniScript, `flexcard-commands.sh` for FlexCard) — cite that query's result as the evidence, not a deploy job id. For any FlexCard, also cite the `design-systems-slds-validate` scorecard result (target ≥ B) from `fsc-omnistudio-developer`'s report as evidence the layout actually matches the validated prototype — `IsActive=true` proves the card exists and runs, not that it looks right; a card that scores low on Design & Layout routes back to `fsc-omnistudio-developer`, the same as a failing check anywhere else in this gate.
 
+## Modo sandbox vs gate completo (Rec 3)
+
+- **Ciclo de build incremental em sandbox** (mudanças aditivas — novos campos, novas classes, CSS): usar `sf project deploy start` direto, **sem `--dry-run` prévio**. O validate (~2–3 min) dobra o ciclo sem valor para mudanças que não alteram configuração existente.
+- **Gate completo obrigatório uma vez ao concluir** o lote de incrementos (todas as fases abaixo). Nunca pular o gate completo, independentemente do número de deploys incrementais já realizados.
+- **Mudanças destrutivas ou de risco alto** (alterar campos existentes, modificar automações corporativas, CalculationMatrix): manter `--dry-run` obrigatório mesmo em sandbox.
+
+## Closure de dependências no pacote (Rec 4)
+
+Nunca validar ou deployar arquivo isolado (ex.: só a classe de teste `_tst`). Montar sempre o pacote com a **closure de dependências**: a classe + seus selectors/services/DTOs, ou usar `--manifest` com o `package-<capacidade>.xml` completo. Validar só `_tst` compila contra código antigo da org e gera erros fantasmas de assinatura.
+
+## Triagem de erro de integração (Rec 18)
+
+Quando uma chamada falha e o diagnóstico não é óbvio:
+1. Filtrar `LogEntry__c` pelo endpoint: `SELECT HttpResponseBody__c, ExceptionMessage__c FROM LogEntry__c WHERE ApiVersion__c = '<endpoint>' ORDER BY CreatedDate DESC LIMIT 5`.
+2. Ler `HttpResponseBody__c`: **4xx rápido (< 500ms) = erro de negócio** (dado inválido, CPF não cadastrado) — não é bug de código; **5xx ou timeout = erro de infra** (sistema fora, firewall, credencial) — investigar infra antes de código.
+3. Nunca reportar "Erro ao enviar..." como diagnóstico final — ler o body real antes de escalar.
+4. CPFs de teste de referência: cadastrado `12345678901`; não cadastrado `73784616526`.
+
+## Pré-requisito passos-manuais-deploy (Rec 24)
+
+Antes de executar as fases abaixo para uma capacidade com integração externa: ler `docs/passos-manuais-deploy.md` e verificar que a seção desta capacidade está completa (Named Credentials na org-alvo, rotas na Lookup Table/DecisionMatrix, dados de negócio fora do source). Um deploy sem esses passos quebra silenciosamente em PROD.
+
 ## Phases (all mandatory, in this order — this mirrors `platform-metadata-deploy`'s own default phase order so build and deploy never fight each other)
 
 1. **Static scan first (fail fast, before spending a deploy cycle)**
@@ -58,6 +80,12 @@ You are the evidence gate between "an agent wrote some metadata" and "this capab
    sf apex run test --target-org <alias> --code-coverage --result-format json --wait 30
    ```
    **CHECK**: every test method's outcome and the org-wide/class coverage numbers in the result. **EXPECT**: zero failed methods, and coverage meets the project's real threshold (75% org-wide is Salesforce's deploy minimum — treat that as a floor, not a target; a class this capability added should be meaningfully covered on its own, not just riding on the org-wide average). A coverage number without the actual test-run id backing it is not evidence.
+
+   **≥1 chamada real em HML por integração (Rec 14):** após os testes unitários passarem, exigir ao menos uma chamada real ao endpoint HML com dados de teste, com **verificação tripla obrigatória**:
+   1. Resposta HTTP: status code + body (ex.: `{"id":"<uuid>"}` + HTTP 202).
+   2. DML resultante: registro gravado/atualizado conforme esperado (query na org).
+   3. `LogEntry__c` criado: `SELECT HttpResponseBody__c, RecordId__c FROM LogEntry__c WHERE ... ORDER BY CreatedDate DESC LIMIT 1` — confirmar body e RecordId preenchidos.
+   Documentar no `build-report.md`. Só o POST/GET real revela formato de resposta, duração e bugs de logging que mocks não detectam.
 
 5. **LWC checks, if the capability includes LWC**
    - Run the component's Jest suite (per `experience-lwc-generate/references/jest-testing.md`) — **CHECK**: exit code. **EXPECT**: all green.
