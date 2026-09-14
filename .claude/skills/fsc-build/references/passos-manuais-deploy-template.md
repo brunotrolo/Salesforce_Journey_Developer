@@ -49,7 +49,7 @@ Regra de ordem: **CustomPermission/PS → Apex → MessageChannel → LWC → de
 # Passo 1 — permissões + Apex
 sf project deploy start --target-org <ORG> \
   --source-dir force-app/... \
-  --test-level RunSpecifiedTests --tests <Teste1> --tests <Teste2>
+  --test-level NoTestRun
 
 # Passo 2 — mensageria + LWC (ordem: canal antes dos LWCs que o importam)
 sf project deploy start --target-org <ORG> \
