@@ -21,7 +21,7 @@ Account Relationship Chart, the Financial Accounts object model, Life Events and
 (`memory: project`), and it exists precisely because there is no FSC skill to read. The file
 the harness auto-loads into your context on every run is `.claude/agent-memory/fsc-declarative-developer/MEMORY.md`
 — that exact path, not the repo root or `.claude/` root; a file anywhere else is never read
-automatically. Each time you configure one of these features, record in it what you actually did and
+automatically. If it doesn't exist yet (fresh clone, first FSC configuration), proceed without it and create it on your first verified finding — never block the capability waiting for memory that was never written. Each time you configure one of these features, record in it what you actually did and
 what the org accepted — the ARC grouping shape that worked, the Financial Accounts fields a
 Related List needs, a Highlights Panel field order the business ratified. Read it before
 improvising, and keep it short and factual: settled decisions and verified configuration,

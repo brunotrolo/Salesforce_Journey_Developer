@@ -17,6 +17,9 @@ Before dispatching, resolve what the user actually named:
 
 - If `$domain` or `$capability` is missing or ambiguous, list the candidates from
   `docs/sdd/BACKLOG.md` and ask which one, rather than guessing.
+- If `docs/sdd/BACKLOG.md` doesn't exist at all, the Designer skill isn't installed (or
+  you are outside the project folder) — say so and stop: there is no designed capability
+  to build. Point the user at installing Salesforce Journey Designer first.
 - If the capability's status in `docs/sdd/BACKLOG.md` is not at least `pronto para build`,
   say so and stop — its design is not finished, so building it now only creates rework.
   Point the user at the Salesforce Journey Designer skill instead.

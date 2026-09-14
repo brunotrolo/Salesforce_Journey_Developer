@@ -29,6 +29,12 @@ One folder per domain, each an independent deploy boundary:
 `force-app/domains/<domain-slug>/main/default/<type>/` — see `force-app/README.md` for the
 full layout. Never write a capability's metadata outside its own domain folder, and never
 deploy `--source-dir force-app` wholesale for a single capability.
+**Org-existente exception:** when `fsc-build-orchestrator` registered org-existente mode for
+the project (existing flat layout, e.g. `force-app/main/default/`), every specialist writes
+under that existing layout instead of `force-app/domains/<domain>/` — the domain-boundary
+rule still holds logically (never touch another domain's artifacts), only the physical root
+changes. The orchestrator states the effective root at dispatch; when in doubt, ask it —
+never invent a third layout.
 
 ## Fixed project scope
 
@@ -43,5 +49,8 @@ deploy `--source-dir force-app` wholesale for a single capability.
 
 ## Conventions
 
-- Agent, rule and skill files are written in English; `README.md` files are in PT-BR.
+- Agent, rule and skill files default to English; `README.md` files are in PT-BR.
+  PT-BR is permitted inside agents/skills for field-validated operational procedures
+  (pilot Recs, runbooks) where the team that proved them works in PT-BR — accuracy of a
+  proven procedure outranks language uniformity.
 - Talk to the user in PT-BR.
