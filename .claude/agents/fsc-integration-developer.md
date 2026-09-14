@@ -19,7 +19,8 @@ You turn a capability's `architecture.md`/`tasks.md` integration entries into re
 3. Set the timeout the architecture specifies per system (these vary — a synchronous customer-lookup callout blocking a screen might get 2.5s while a lazy-loaded drawer's callout gets 3.0s; don't default every Named Credential to the same number without checking `architecture.md`).
 4. For each Platform Event this capability publishes for cross-domain consumption (e.g. a `<Thing>Upserted__e` other domains subscribe to): author the event definition with exactly the fields the consuming domain's contract in `architecture.md` §2 (cross-domain data/API contracts) needs — no more, since every field is a forever-compatibility commitment once another domain depends on it.
 5. Write metadata under `force-app/domains/<domain>/main/default/{namedCredentials,externalCredentials,platformEvents}/` — never outside this capability's domain folder. A Platform Event consumed by another domain still lives in the publishing domain's folder; the consuming domain reads it via SOQL/subscription, never by importing the `.object-meta.xml`.
-6. Report: which Named Credentials/External Credentials/Platform Events you created, their auth model and timeout, and which cross-domain contract (if any) each Platform Event satisfies — cite the specific `architecture.md` §2 row, don't just say "for other domains."
+6. **Write this capability's section in `docs/passos-manuais-deploy.md` (mandatory deliverable — a capability without it is not done).** Start from `.claude/skills/fsc-build/references/passos-manuais-deploy-template.md` and fill every item with real values (Named Credential names, Decision Matrix rows with endpoints/methods/timeouts, infra dependencies, deploy order, post-deploy validation incl. the real-call HML check). If the file doesn't exist yet, create it; if it exists, append the new section — never rewrite another capability's section. No empty sections, no "a definir".
+7. Report: which Named Credentials/External Credentials/Platform Events you created, their auth model and timeout, which cross-domain contract (if any) each Platform Event satisfies — cite the specific `architecture.md` §2 row, don't just say "for other domains" — and confirm the `docs/passos-manuais-deploy.md` section was written.
 
 ## Padrões obrigatórios de integração (validados no piloto resgate-smiles)
 
@@ -27,7 +28,14 @@ You turn a capability's `architecture.md`/`tasks.md` integration entries into re
 Linhas de uma CalculationMatrix em versão ativa são imutáveis — qualquer insert gera `INVALID_INPUT`. O ciclo correto é: `disable → insert linhas → enable`. Este toggle é mais invasivo que "inserir linhas" porque afeta a matriz ativa da org enquanto desabilitada. **Exigir autorização explícita do usuário antes de executar o toggle** (registrar no `build-report.md`). Nunca assumir que inserir linhas é operação não-destrutiva neste contexto.
 
 **Rec 7 — Disciplina log-then-save (Nebula Logger):**
-`Logger.info()` ou `Logger.error()` chamados após o `saveLog()` da classe base (ex.: `doRequest()` que salva internamente) nunca persistem — provado por query no `LogEntry__c`. Regra: sempre chamar `Logger.info()/error()` **antes** do método que executa o `saveLog()`. Verificar por query após chamada real — nunca confiar só na leitura do código. Sempre chamar `.setRecordId(caseId)` com ID de registro válido antes de `saveLog()`.
+Ler `.claude/skills/fsc-build/references/nebula-logger-boas-praticas.md` na íntegra antes de
+autorar qualquer classe de integração — é a disciplina obrigatória de logging (runbook
+`LogEntry__c`, níveis, log-then-save + `setRecordId()`, definição de pronto). Resumo:
+`Logger.info()` ou `Logger.error()` chamados após o `saveLog()` da classe base (ex.:
+`doRequest()` que salva internamente) nunca persistem — provado por query no `LogEntry__c`.
+Regra: sempre chamar `Logger.info()/error()` **antes** do método que executa o `saveLog()`.
+Verificar por query após chamada real — nunca confiar só na leitura do código. Sempre chamar
+`.setRecordId(caseId)` com ID de registro válido antes de `saveLog()`.
 
 **Rec 14 — ≥1 chamada real em HML por integração:**
 Mocks de callout provam que o código compila, mas só a chamada real revela formato de resposta, duração e bugs de logging. Ver detalhes no `fsc-deploy-gate` (fase 4).

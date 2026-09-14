@@ -56,7 +56,7 @@ Usuário Standard sem FLS quebra DML de campo custom. Usuário admin sem PS queb
 Todo update de `Status` ou burn de campo (ex.: fechar caso, gravar `TransactionId__c`) deve ser **re-lido com SOQL e asserido** no teste — nunca asserir só o retorno do método. Automações da org podem reverter o status em contextos não determinísticos. O re-read prova que o valor persistiu na org, não só que o método não lançou exceção.
 
 **Rec 13 — Parse defensivo de response body + null no Logger:**
-Manter parse tolerante (aliases, null-safe, envelope). Documentar que o Logger corporativo pode rejeitar corpos com campos `null` na raiz (ex.: `{"requestId": null}` falha antes do parse do Apex) — tratar `null` antes de passar ao Logger.
+Manter parse tolerante (aliases, null-safe, envelope). Documentar que o Logger corporativo pode rejeitar corpos com campos `null` na raiz (ex.: `{"requestId": null}` falha antes do parse do Apex) — tratar `null` antes de passar ao Logger. Para a disciplina completa de logging (níveis, `RecordId__c`, segredos proibidos, definição de pronto), ler `.claude/skills/fsc-build/references/nebula-logger-boas-praticas.md`.
 
 **Rec 21 — Trilha de auditoria append-only em campo Text(500):**
 Para gravar histórico de operadores/ações em campo existente sem criar campo novo:

@@ -45,7 +45,7 @@ Quando uma chamada falha e o diagnóstico não é óbvio:
 
 ## Pré-requisito passos-manuais-deploy (Rec 24)
 
-Antes de executar as fases abaixo para uma capacidade com integração externa: ler `docs/passos-manuais-deploy.md` e verificar que a seção desta capacidade está completa (Named Credentials na org-alvo, rotas na Lookup Table/DecisionMatrix, dados de negócio fora do source). Um deploy sem esses passos quebra silenciosamente em PROD.
+Antes de executar as fases abaixo para uma capacidade com integração externa: ler `docs/passos-manuais-deploy.md` e verificar que a seção desta capacidade está completa (Named Credentials na org-alvo, rotas na Lookup Table/DecisionMatrix, dados de negócio fora do source) — completa significa: cada item do template em `.claude/skills/fsc-build/references/passos-manuais-deploy-template.md` preenchido com valores reais, sem seção vazia nem "a definir". Se a seção estiver ausente ou incompleta, **falhar o gate** e rotear de volta ao `fsc-integration-developer`, não ao usuário. Um deploy sem esses passos quebra silenciosamente em PROD. Para o runbook de logs e a tríplice conferência, usar `.claude/skills/fsc-build/references/nebula-logger-boas-praticas.md` (§1 e §4).
 
 ## Phases (all mandatory, in this order — this mirrors `platform-metadata-deploy`'s own default phase order so build and deploy never fight each other)
 

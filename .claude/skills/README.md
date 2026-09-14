@@ -55,6 +55,18 @@ O restante (`frontend-ui-engineering`, `performance-optimization`, `browser-test
 
 O resto (TDD/domain-modeling/wayfinder/etc.) já está coberto de forma mais específica pelas skills oficiais da Salesforce ou pelo `agent-skills` acima; duplicar a mesma disciplina em prosa genérica de TypeScript não ajuda.
 
+## Skills autorais (`fsc-build/`, `fsc-gate/`)
+
+As únicas invocáveis (`/fsc-build`, `/fsc-gate`). A `fsc-build/` carrega ainda três
+referências próprias em `fsc-build/references/` — não são imports, são documentos deste
+projeto, destilados do piloto real:
+
+| Referência | Lida por | Para quê |
+|---|---|---|
+| `nebula-logger-boas-praticas.md` | `fsc-integration-developer`, `fsc-apex-developer`, `fsc-deploy-gate` | Disciplina obrigatória de logging (runbook `LogEntry__c`, log-then-save + `RecordId__c`, definição de pronto) |
+| `permissionamento-odin-v2.md` | `fsc-data-model-developer` | Padrão ODIN de nomenclatura de PS/PSG/CP + checklist de criação |
+| `passos-manuais-deploy-template.md` | `fsc-integration-developer` (escreve), `fsc-deploy-gate` (cobra) | Esqueleto da entrega obrigatória `docs/passos-manuais-deploy.md` para capacidades com integração |
+
 ## Sobre os 3 repositórios sugeridos — avaliação honesta
 
 Nenhum dos três é específico de Salesforce/Apex/SFDX. Eles não ensinam nada sobre governor limits, bulkificação de SOQL, CRUD/FLS, Metadata API ou deploy via `sf` — quem cobre isso são as 19 skills oficiais acima. O que eles agregam é **disciplina de engenharia transferível**, por isso a curadoria seletiva em vez de importar tudo (ver as duas tabelas acima para o mapeamento exato skill → agente).
