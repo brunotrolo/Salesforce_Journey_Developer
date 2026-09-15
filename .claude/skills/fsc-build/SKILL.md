@@ -13,6 +13,17 @@ Build and deploy the capability **`$capability`** in domain **`$domain`**.
 Dispatch the `fsc-build-orchestrator` subagent for it. That agent owns the whole procedure —
 do not re-derive it here, and do not build anything yourself in the main context.
 
+## Dois modos: desenvolvimento rápido vs finalização
+
+- **Desenvolvimento em sandbox (padrão, máxima performance):** ajustes e validação via
+  deploy rápido `sf project deploy start --target-org CoreEvol --source-dir <path>
+  --test-level NoTestRun` — sem testes, sem cobertura, sem scans e **sem** atualizar
+  documentações de referência. Este modo **não** invoca `fsc-deploy-gate`.
+- **Finalização/homologação (somente sob pedido explícito do usuário):** com
+  `FSC_FINALIZE_DOCS=1` para documentações de referência e
+  `FSC_HEAVY_TESTS_APPROVED=1` para testes/cobertura/scans, aí sim roda o
+  `fsc-build-orchestrator` + `fsc-deploy-gate` completos.
+
 Before dispatching, resolve what the user actually named:
 
 - If `$domain` or `$capability` is missing or ambiguous, list the candidates from
@@ -28,8 +39,10 @@ Before dispatching, resolve what the user actually named:
   Point the user at the Salesforce Journey Designer skill instead.
 
 When the orchestrator reports back, relay to the user, in PT-BR: what was built, what was
-deployed, the deploy gate's evidence (deploy job id, test run id, coverage %, scan result),
-and anything still open. Never report the capability as built without that evidence.
+deployed, and anything still open. No modo de desenvolvimento rápido, basta o
+`status: Succeeded` do deploy `NoTestRun`. A evidência completa do gate
+(deploy job id, test run id, coverage %, scan result) só é exigida na finalização,
+quando o usuário pediu explicitamente o gate completo.
 
 ## References (this skill's own, read by its agents — not imports)
 
@@ -41,11 +54,13 @@ and anything still open. Never report the capability as built without that evide
   EN labels, creation checklist). Read by `fsc-data-model-developer`.
 - `references/passos-manuais-deploy-template.md` — skeleton for the mandatory deliverable below.
 
-## Mandatory deliverable: `docs/passos-manuais-deploy.md`
+## Deliverable `docs/passos-manuais-deploy.md` (somente na finalização)
 
-Every capability with external integration **must** ship a section in
+Somente quando o usuário pedir explicitamente a finalização (`FSC_FINALIZE_DOCS=1`),
+toda capacidade com integração externa shipa uma seção em
 `docs/passos-manuais-deploy.md` (one section per capability, from the template above):
 pre-deploy manual steps (infra, credentials, Lookup Table/Decision Matrix rows, business
 pendencies), deploy order, and post-deploy validation. `fsc-integration-developer` writes it;
-`fsc-deploy-gate` reads it before declaring built and fails the gate if the section is
-missing or incomplete. A capability delivered without this file is not done.
+nesse modo, `fsc-deploy-gate` reads it before declaring built and fails the gate if the
+section is missing or incomplete. Durante o desenvolvimento rápido em sandbox, este
+arquivo **não** é criado nem atualizado — foco total nos artefatos da org.

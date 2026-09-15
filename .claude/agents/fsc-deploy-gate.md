@@ -27,8 +27,8 @@ You are the evidence gate between "an agent wrote some metadata" and "this capab
 
 ## Modo sandbox vs gate completo (Rec 3)
 
-- **Ciclo de build incremental em sandbox** (mudanças aditivas — novos campos, novas classes, CSS): usar `sf project deploy start` direto, **sem `--dry-run` prévio**. O validate (~2–3 min) dobra o ciclo sem valor para mudanças que não alteram configuração existente.
-- **Gate completo obrigatório uma vez ao concluir** o lote de incrementos (todas as fases abaixo). Nunca pular o gate completo, independentemente do número de deploys incrementais já realizados.
+- **Ciclo de build incremental em sandbox = modo padrão (máxima performance)** (mudanças aditivas — novos campos, novas classes, CSS): usar `sf project deploy start --target-org CoreEvol --source-dir <path> --test-level NoTestRun` direto, **sem `--dry-run` prévio, sem scans, sem testes, sem atualizar docs de referência**. Este modo **não** invoca este gate.
+- **Gate completo somente na finalização, sob pedido explícito do usuário** (`FSC_HEAVY_TESTS_APPROVED=1` para testes/cobertura/scans e `FSC_FINALIZE_DOCS=1` para docs). Não rodar o gate completo automaticamente ao concluir incrementos — somente quando o usuário pedir a homologação. Todas as fases abaixo pertencem a esse modo.
 - **Mudanças destrutivas ou de risco alto** (alterar campos existentes, modificar automações corporativas, CalculationMatrix): manter `--dry-run` obrigatório mesmo em sandbox.
 
 ## Closure de dependências no pacote (Rec 4)
@@ -45,9 +45,9 @@ Quando uma chamada falha e o diagnóstico não é óbvio:
 
 ## Pré-requisito passos-manuais-deploy (Rec 24)
 
-Antes de executar as fases abaixo para uma capacidade com integração externa: ler `docs/passos-manuais-deploy.md` e verificar que a seção desta capacidade está completa (Named Credentials na org-alvo, rotas na Lookup Table/DecisionMatrix, dados de negócio fora do source) — completa significa: cada item do template em `.claude/skills/fsc-build/references/passos-manuais-deploy-template.md` preenchido com valores reais, sem seção vazia nem "a definir". Se a seção estiver ausente ou incompleta, **falhar o gate** e rotear de volta ao `fsc-integration-developer`, não ao usuário. Um deploy sem esses passos quebra silenciosamente em PROD. Para o runbook de logs e a tríplice conferência, usar `.claude/skills/fsc-build/references/nebula-logger-boas-praticas.md` (§1 e §4).
+Somente no modo finalização (`FSC_FINALIZE_DOCS=1`), antes de executar as fases abaixo para uma capacidade com integração externa: ler `docs/passos-manuais-deploy.md` e verificar que a seção desta capacidade está completa (Named Credentials na org-alvo, rotas na Lookup Table/DecisionMatrix, dados de negócio fora do source) — completa significa: cada item do template em `.claude/skills/fsc-build/references/passos-manuais-deploy-template.md` preenchido com valores reais, sem seção vazia nem "a definir". Se a seção estiver ausente ou incompleta, **falhar o gate** e rotear de volta ao `fsc-integration-developer`, não ao usuário. Um deploy sem esses passos quebra silenciosamente em PROD. Para o runbook de logs e a tríplice conferência, usar `.claude/skills/fsc-build/references/nebula-logger-boas-praticas.md` (§1 e §4). No modo desenvolvimento rápido este pré-requisito **não** se aplica e **não** falha nada.
 
-## Phases (all mandatory, in this order — this mirrors `platform-metadata-deploy`'s own default phase order so build and deploy never fight each other)
+## Phases (modo finalização: all mandatory, in this order — this mirrors `platform-metadata-deploy`'s own default phase order so build and deploy never fight each other; no modo desenvolvimento rápido, nenhuma destas fases roda — usa-se apenas o deploy `NoTestRun` fora deste gate)
 
 1. **Static scan first (fail fast, before spending a deploy cycle)**
    - Run `dx-code-analyzer-run`'s scan against exactly the files this capability touched (git diff scope, not the whole repo) — PMD/SFGE for Apex, ESLint for LWC, and ApexGuru if available.
@@ -62,7 +62,7 @@ Antes de executar as fases abaixo para uma capacidade com integração externa: 
 
    **If it fails for any reason other than coverage** (compile error, a genuine test failure, a metadata conflict): stop here, route the failure back to the specialist agent that owns the failing component, and do not proceed to a real deploy — this branch is unchanged.
 
-   **If it fails specifically on insufficient Apex coverage** (the result names an org-wide or per-class coverage percentage below the org's real minimum — e.g. "Average test coverage across all Apex Classes and Triggers is X%, at least 75% test coverage is required", or a specific class flagged below its own threshold): this is a mechanical gap, not a design problem, and you resolve it yourself rather than routing back:
+    **If it fails specifically on insufficient Apex coverage** (the result names an org-wide or per-class coverage percentage below the org's real minimum — e.g. "Average test coverage across all Apex Classes and Triggers is X%, at least 75% test coverage is required", or a specific class flagged below its own threshold): somente no modo finalização com `FSC_HEAVY_TESTS_APPROVED=1`, this is a mechanical gap, not a design problem, and you resolve it yourself rather than routing back (sem a flag, reporte `ABANDON: heavy tests not approved` e pare):
    1. Read exactly which class(es)/trigger(s) the result names as under-covered — never the whole org blindly.
    2. Ensure `.claude/skills/apex-test-loop/` exists per the Prerequisites note above (clone it if missing).
    3. Read `.claude/skills/apex-test-loop/SKILL.md` and `references/loop-rules.md` in full, then run its loop against exactly the under-covered class(es) named in step 1 — `/apex-test-loop <ClassName>` per its documented usage, one class at a time or batched per its own guidance.

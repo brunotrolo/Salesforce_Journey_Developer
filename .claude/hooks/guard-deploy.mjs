@@ -18,19 +18,26 @@ const RULES = [
     test: (c) =>
       /\bsf\b[^|;&]*\bproject\s+deploy\b/.test(c) &&
       !/--dry-run/.test(c) &&
-      /--test-level[= ]\s*NoTestRun/i.test(c),
-    reason:
-      'Fast deploy: using --test-level NoTestRun for incremental iterations; deploy without tests is allowed.',
-  },
-  {
-    test: (c) =>
-      /\bsf\b[^|;&]*\bproject\s+deploy\b/.test(c) &&
-      !/--dry-run/.test(c) &&
       !/--test-level[= ]\s*NoTestRun/i.test(c) &&
       !/FSC_HEAVY_TESTS_APPROVED=1/.test(c),
     reason:
       'Deploy with tests is heavy; only run after explicit approval. Prefix the command with FSC_HEAVY_TESTS_APPROVED=1.',
-  }
+  },
+  {
+    test: (c) =>
+      /\bsf\b[^|;&]*\bapex\s+run\s+test\b/.test(c) &&
+      !/FSC_HEAVY_TESTS_APPROVED=1/.test(c),
+    reason:
+      'Apex test run is heavy; only run after explicit approval. Prefix the command with FSC_HEAVY_TESTS_APPROVED=1.',
+  },
+  {
+    test: (c) =>
+      /\bsf\b[^|;&]*\b(project\s+deploy|apex\s+run\s+test)\b/.test(c) &&
+      /(?:^|\s)--target-org(=|\s+)/.test(c) &&
+      !/(?:^|\s)--target-org(=|\s+)["']?CoreEvol["']?/.test(c),
+    reason:
+      'Only the sandbox org alias "CoreEvol" is allowed for deploys/test runs; specify --target-org CoreEvol.',
+  },
   {
     test: (c) =>
       /\bsf\b[^|;&]*\bproject\s+deploy\b/.test(c) &&

@@ -1,9 +1,11 @@
 # Template — `docs/passos-manuais-deploy.md` (seção por capacidade)
 
-**Entrega obrigatória** para toda capacidade com integração externa. O `fsc-integration-developer`
-cria/atualiza a seção desta capacidade; o `fsc-deploy-gate` **lê este arquivo antes de declarar
-built** e falha o gate se a seção estiver ausente ou incompleta. Copiar o esqueleto abaixo,
-uma seção por capacidade, preenchendo cada item — nada de seção vazia ou "a definir".
+**Entrega da finalização (somente com `FSC_FINALIZE_DOCS=1`)** para toda capacidade com
+integração externa. O `fsc-integration-developer` cria/atualiza a seção desta capacidade
+somente nesse modo; o `fsc-deploy-gate`, também somente nesse modo, **lê este arquivo
+antes de declarar built** e falha o gate se a seção estiver ausente ou incompleta.
+Copiar o esqueleto abaixo, uma seção por capacidade, preenchendo cada item — nada de
+seção vazia ou "a definir". No desenvolvimento rápido em sandbox, não criar nem atualizar este arquivo.
 
 ```markdown
 # Passos Manuais — <Nome da capacidade> (pré/pós-deploy CI/CD)
@@ -63,9 +65,9 @@ sf project deploy start --target-org <ORG> \
 
 - [ ] Atribuir `<PS_..._Edit>` e `<PS_..._View>` aos operadores **<grupo>**.
 - [ ] Não atribuir a **<grupo excluído>** (deve NÃO ver — `<critério de aceite>`).
-- [ ] **1 chamada real HML** com dado de teste + verificar:
+- [ ] **1 chamada real HML — somente na finalização** com dado de teste + verificar:
       (a) resposta `<status + corpo>`, (b) DML resultante `<campo>`, (c) trilha `<campo>`,
       (d) N entradas no `LogEntry__c` (Nebula).
-- [ ] Rodar suíte: `sf apex run test --target-org <ORG> --class-names <T1,T2> --result-format human`.
+- [ ] Rodar suíte — somente na finalização com `FSC_HEAVY_TESTS_APPROVED=1`: `sf apex run test --target-org <ORG> --class-names <T1,T2> --result-format human`.
 - [ ] **Rollback:** `<comando ou procedimento de reversão, se aplicável>`.
 ```
