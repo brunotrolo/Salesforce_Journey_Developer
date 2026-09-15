@@ -23,6 +23,17 @@ do not re-derive it here, and do not build anything yourself in the main context
   `FSC_FINALIZE_DOCS=1` para documentações de referência e
   `FSC_HEAVY_TESTS_APPROVED=1` para testes/cobertura/scans, aí sim roda o
   `fsc-build-orchestrator` + `fsc-deploy-gate` completos.
+- **Delta no fast-path:** deployar só os arquivos tocados (`--source-dir` estreito por
+  arquivo/pasta, ou `--manifest` mínimo com a closure de dependências) — nunca a pasta
+  do domínio inteira. Menos zip, menos tempo, zero re-deploy acidental.
+- **Teste nasce junto, executa depois:** toda classe nova já vem com sua `*Test.cls`
+  (ou `*_tst.cls`) e asserts na mesma iteração; a execução fica para a finalização.
+- **Smoke manual de integração no dev:** 1 chamada HML manual por integração nova
+  (só HTTP status + body), sem a tríplice conferência formal — pega erro de
+  contrato/credencial cedo; a evidência formal é só na finalização.
+- **Antes de pedir a finalização**, rode o check de 30s:
+  `node .claude/skills/fsc-build/scripts/pre-finalizacao-check.mjs --root <metadata-root>
+  --manifest manifest/package-<capacidade>.xml --backlog docs/sdd/BACKLOG.md --slug <NNN-slug>`.
 
 Before dispatching, resolve what the user actually named:
 

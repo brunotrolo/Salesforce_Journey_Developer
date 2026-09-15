@@ -74,7 +74,7 @@ Somente no modo finalização (`FSC_FINALIZE_DOCS=1`), antes de executar as fase
    ```bash
    sf project deploy start --source-dir <package path> --target-org <alias> --test-level RunLocalTests --wait 30 --json
    ```
-   (Use `--manifest` instead of `--source-dir` when the orchestrator scoped this by manifest.) **CHECK**: `status` in the result JSON. **EXPECT**: `Succeeded`. Record the deploy **job id** — this is the evidence artifact the build report cites, not "I ran the deploy command." If this phase fails on coverage despite phase 2 passing (rare — e.g. new Apex the plan added between phases), apply the same coverage remediation branch from phase 2 before retrying.
+    (Use `--manifest` instead of `--source-dir` when the orchestrator scoped this by manifest.) Ajuste `--wait` ao tamanho do pacote (delta pequeno ≤10 arquivos: 10; padrão: 30; manifest grande: 60) — timeout estourado não é falha de deploy, é espera curta. **CHECK**: `status` in the result JSON. **EXPECT**: `Succeeded`. Record the deploy **job id** — this is the evidence artifact the build report cites, not "I ran the deploy command." If this phase fails on coverage despite phase 2 passing (rare — e.g. new Apex the plan added between phases), apply the same coverage remediation branch from phase 2 before retrying.
 
 4. **Apex test run with coverage, if the capability includes Apex**
    ```bash
