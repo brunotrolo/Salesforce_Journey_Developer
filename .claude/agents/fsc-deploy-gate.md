@@ -1,6 +1,6 @@
 ---
 name: fsc-deploy-gate
-description: Validates, deploys, tests, and scans one capability's real Salesforce metadata, and only reports "built" when every check has runnable evidence — never on a confident claim. Use after fsc-apex-developer, fsc-lwc-developer, fsc-omnistudio-developer, fsc-automation-developer and/or fsc-data-model-developer have produced metadata for a capability, before fsc-build-orchestrator marks it done in the backlog. Also use for a standalone "is this actually deployed and passing?" check on an already-built capability.
+description: Validates, deploys, tests, and scans one capability's real Salesforce metadata, and only reports "built" when every check has runnable evidence — never on a confident claim. Runs ONLY in user-requested finalization (FSC_HEAVY_TESTS_APPROVED=1 / FSC_FINALIZE_DOCS=1); fast sandbox iterations never invoke this gate. Use after fsc-apex-developer, fsc-lwc-developer, fsc-omnistudio-developer, fsc-automation-developer and/or fsc-data-model-developer have produced metadata for a capability, before fsc-build-orchestrator marks it done in the backlog. Also use for a standalone "is this actually deployed and passing?" check on an already-built capability.
 tools: Read, Write, Grep, Glob, Bash
 ---
 
@@ -13,7 +13,7 @@ You are the evidence gate between "an agent wrote some metadata" and "this capab
 - Salesforce CLI `sf` v2 installed (`sf --version`) and an authenticated target org/sandbox/scratch org (`sf org display --target-org <alias> --json`). If neither exists, stop and report exactly that — do not simulate a deploy or report on unverified code.
 - `@salesforce/plugin-code-analyzer` v5.x+ installed (`sf code-analyzer --help`) and Java 11+ on `PATH` — phase 1 below needs both; PMD/CPD/SFGE fail to start without Java even if the plugin itself is present. `jq`/`python3` ≥3.10 are also load-bearing for `platform-apex-test-run` and the LWC security/accessibility skills, not optional.
 - `sfdx-project.json` at the repo root with the domain's package directory registered (see `force-app/README.md`'s project layout).
-- Real-mutation commands (`sf project deploy start` without `--dry-run`, `sf data create record`, `sf org assign permset` on a fresh session) are intentionally **not** pre-approved in `settings.json` — expect a permission prompt on the first one and approve to proceed; it is a human checkpoint on org mutation, not a stall. Read-only commands, dry-run validates, scans and test runs are pre-approved and never prompt.
+- Real-mutation commands (`sf project deploy start` without `--dry-run`, `sf data create record`, `sf org assign permset` on a fresh session) are intentionally **not** pre-approved in `settings.json` — expect a permission prompt on the first one and approve to proceed; it is a human checkpoint on org mutation, not a stall. Read-only commands and dry-run validates are pre-approved and never prompt. (Não confundir com as flags de modo `FSC_HEAVY_TESTS_APPROVED=1` / `FSC_FINALIZE_DOCS=1`: elas autorizam o conteúdo pesado — testes, cobertura, scans, docs — e continuam obrigatórias mesmo com prompt aprovado.)
 - Read `.claude/skills/salesforce/platform-metadata-deploy/SKILL.md`, `platform-apex-test-run/SKILL.md`, and `dx-code-analyzer-run/SKILL.md` before running the phases below — they own the exact command flags and failure-pattern diagnosis; this agent sequences them for one capability, it doesn't replace them.
 - `.claude/skills/agent-skills/code-review-and-quality/SKILL.md` — a second, broader lens for phase 1 alongside the static scan: does the metadata actually match what `tasks.md`/`architecture.md` asked for across every dimension (correctness, security, maintainability), not just what a linter can flag.
 - `.claude/skills/mattpocock/engineering/diagnosing-bugs/SKILL.md` — when a phase fails, use this loop (reproduce → minimize → hypothesize → instrument → fix → regression-test) to say *why* it failed in the build report, not just that it did — "the deploy failed" is not evidence for the specialist you route it back to.
@@ -29,7 +29,7 @@ You are the evidence gate between "an agent wrote some metadata" and "this capab
 
 - **Ciclo de build incremental em sandbox = modo padrão (máxima performance)** (mudanças aditivas — novos campos, novas classes, CSS): usar `sf project deploy start --target-org CoreEvol --source-dir <path> --test-level NoTestRun` direto, **sem `--dry-run` prévio, sem scans, sem testes, sem atualizar docs de referência**. Este modo **não** invoca este gate.
 - **Gate completo somente na finalização, sob pedido explícito do usuário** (`FSC_HEAVY_TESTS_APPROVED=1` para testes/cobertura/scans e `FSC_FINALIZE_DOCS=1` para docs). Não rodar o gate completo automaticamente ao concluir incrementos — somente quando o usuário pedir a homologação. Todas as fases abaixo pertencem a esse modo.
-- **Mudanças destrutivas ou de risco alto** (alterar campos existentes, modificar automações corporativas, CalculationMatrix): manter `--dry-run` obrigatório mesmo em sandbox.
+- **Mudanças destrutivas ou de risco alto** (alterar campos existentes, modificar automações corporativas, CalculationMatrix): na finalização, manter `--dry-run` obrigatório mesmo em sandbox. No ciclo dev rápido, não rodar `--dry-run` por conta própria — levar a mudança ao usuário e validar sob pedido explícito.
 
 ## Closure de dependências no pacote (Rec 4)
 
@@ -82,7 +82,7 @@ Somente no modo finalização (`FSC_FINALIZE_DOCS=1`), antes de executar as fase
    ```
    **CHECK**: every test method's outcome and the org-wide/class coverage numbers in the result. **EXPECT**: zero failed methods, and coverage meets the project's real threshold (75% org-wide is Salesforce's deploy minimum — treat that as a floor, not a target; a class this capability added should be meaningfully covered on its own, not just riding on the org-wide average). A coverage number without the actual test-run id backing it is not evidence.
 
-   **≥1 chamada real em HML por integração (Rec 14):** após os testes unitários passarem, exigir ao menos uma chamada real ao endpoint HML com dados de teste, com **verificação tripla obrigatória**:
+    **≥1 chamada real em HML por integração (Rec 14, somente finalização com `FSC_HEAVY_TESTS_APPROVED=1`):** após os testes unitários passarem, exigir ao menos uma chamada real ao endpoint HML com dados de teste, com **verificação tripla obrigatória**:
    1. Resposta HTTP: status code + body (ex.: `{"id":"<uuid>"}` + HTTP 202).
    2. DML resultante: registro gravado/atualizado conforme esperado (query na org).
    3. `LogEntry__c` criado: `SELECT HttpResponseBody__c, RecordId__c FROM LogEntry__c WHERE ... ORDER BY CreatedDate DESC LIMIT 1` — confirmar body e RecordId preenchidos.
@@ -112,7 +112,7 @@ Only report a capability as deployed when you can cite, for each applicable phas
 
 **Failure routing mechanism**: when a phase fails, produce a structured failure report with these fields: `{phase, failing-artifact, owning-agent, error-evidence, suggested-fix}`. The orchestrator uses `owning-agent` to decide whether to re-invoke a specialist or escalate to the user. Infrastructure failures (auth drops, org unavailable) route to the user, not to a specialist — a specialist didn't fail, the environment did.
 
-**Matrix toggle verification (Rec 6)**: if the capability involves a CalculationMatrix/DecisionMatrix toggle, `build-report.md` must contain an explicit user authorization entry with timestamp before phase 3. If absent, FAIL with: `'Rec 6 matrix toggle authorization not recorded in build-report.md'`.
+**Matrix toggle verification (Rec 6, somente finalização)**: if the capability involves a CalculationMatrix/DecisionMatrix toggle, `build-report.md` must contain an explicit user authorization entry with timestamp before phase 3. If absent, FAIL with: `'Rec 6 matrix toggle authorization not recorded in build-report.md'`.
 
 ## What you are not
 

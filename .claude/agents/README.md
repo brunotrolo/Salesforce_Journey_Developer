@@ -4,7 +4,7 @@ Nove subagentes do Claude Code, cada um consumindo um subconjunto das skills em 
 
 | Agente | Papel |
 |---|---|
-| `fsc-build-orchestrator` | Ponto de entrada. Lê **100% da pasta** `specs/<domínio>/<NNN>-<slug>/` de uma capacidade, sequencia os especialistas abaixo, nunca declara "construído" sem o `fsc-deploy-gate` passar. |
+| `fsc-build-orchestrator` | Ponto de entrada. Lê **100% da pasta** `specs/<domínio>/<NNN>-<slug>/` de uma capacidade, sequencia os especialistas abaixo; iterações de dev validam com deploy `NoTestRun` sem gate, e "construído" só é declarado com o `fsc-deploy-gate` passando na finalização pedida pelo usuário. |
 | `fsc-data-model-developer` | Objetos/campos/RecordTypes/permission sets reais (`platform-custom-object-generate`, `platform-custom-field-generate`, `platform-permission-set-generate`). |
 | `fsc-integration-developer` | Named Credentials/External Credentials/Platform Events (`integration-connectivity-generate`) — a plumbing que todo callout/evento cross-domain depende de existir antes. |
 | `fsc-apex-developer` | Apex de produção + classe de teste (`platform-apex-generate` + `platform-apex-test-generate`), incluindo callouts via `HttpCalloutMock`. |
@@ -23,7 +23,7 @@ Peça pelo **domínio + capacidade**, exatamente como no Designer — a capacida
 O orquestrador roda, por capacidade:
 1. Confere `docs/sdd/BACKLOG.md` — status precisa ser "pronto para build" (o Designer já terminou spec/design/protótipo/plano técnico).
 2. Lê 100% da pasta da capacidade (`spec.md`, `plan.md`, `tasks.md`, `architecture.md`, `prototype/` e qualquer outro arquivo presente), despacha os especialistas na ordem de dependência: modelo de dados → integração → Apex → LWC → OmniStudio → declarativo (monta o que LWC/OmniStudio já construíram) → Flow — a mesma ordem que `platform-metadata-deploy` usa para deploy, de propósito.
-3. Roda `fsc-deploy-gate` — obrigatório, sem atalho.
+3. Na finalização pedida pelo usuário, roda `fsc-deploy-gate` — obrigatório, sem atalho (no dev rápido, valida só com deploy `NoTestRun`).
 4. Atualiza `docs/sdd/BACKLOG.md` e escreve `specs/<domínio>/<NNN>-<slug>/build-report.md` com a evidência.
 
 ## Pré-requisitos além dos do Designer

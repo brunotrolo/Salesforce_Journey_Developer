@@ -10,18 +10,25 @@
 
 const RULES = [
   {
-    test: (c) => /\bsf\b[^|;&]*\bproject\s+deploy\b/.test(c) && /--ignore-errors|--ignore-warnings/.test(c),
+    test: (c) =>
+      /\bsf\b[^|;&]*\b(project\s+deploy\s+start|apex\s+run\s+test)\b/.test(c) &&
+      /(?:^|\s)--target-org(=|\s+)/.test(c) &&
+      !/(?:^|\s)--target-org(=|\s+)["']?CoreEvol["']?/.test(c),
+    reason:
+      'Only the sandbox org alias "CoreEvol" is allowed for deploys/test runs; specify --target-org CoreEvol.',
+  },
+  {
+    test: (c) => /\bsf\b[^|;&]*\bproject\s+deploy\s+start\b/.test(c) && /--ignore-errors|--ignore-warnings/.test(c),
     reason:
       'Deploy parcial com --ignore-errors/--ignore-warnings esconde falhas e contradiz o portao de evidencia (fsc-deploy-gate). Rode o deploy sem essas flags e trate a falha real.',
   },
   {
     test: (c) =>
-      /\bsf\b[^|;&]*\bproject\s+deploy\b/.test(c) &&
-      !/--dry-run/.test(c) &&
+      /\bsf\b[^|;&]*\bproject\s+deploy\s+start\b/.test(c) &&
       !/--test-level[= ]\s*NoTestRun/i.test(c) &&
       !/FSC_HEAVY_TESTS_APPROVED=1/.test(c),
     reason:
-      'Deploy with tests is heavy; only run after explicit approval. Prefix the command with FSC_HEAVY_TESTS_APPROVED=1.',
+      'Deploy with tests is heavy (including --dry-run validates); only run after explicit approval. Prefix the command with FSC_HEAVY_TESTS_APPROVED=1.',
   },
   {
     test: (c) =>
@@ -32,15 +39,15 @@ const RULES = [
   },
   {
     test: (c) =>
-      /\bsf\b[^|;&]*\b(project\s+deploy|apex\s+run\s+test)\b/.test(c) &&
-      /(?:^|\s)--target-org(=|\s+)/.test(c) &&
-      !/(?:^|\s)--target-org(=|\s+)["']?CoreEvol["']?/.test(c),
+      /\bsf\b[^|;&]*\bcode-analyzer\b/.test(c) &&
+      !/--help/.test(c) &&
+      !/FSC_HEAVY_TESTS_APPROVED=1/.test(c),
     reason:
-      'Only the sandbox org alias "CoreEvol" is allowed for deploys/test runs; specify --target-org CoreEvol.',
+      'Static scan is heavy; only run after explicit approval. Prefix the command with FSC_HEAVY_TESTS_APPROVED=1.',
   },
   {
     test: (c) =>
-      /\bsf\b[^|;&]*\bproject\s+deploy\b/.test(c) &&
+      /\bsf\b[^|;&]*\bproject\s+deploy\s+start\b/.test(c) &&
       /--source-dir[= ]\s*["']?force-app["']?(\s|$)/.test(c),
     reason:
       'Deploy de force-app inteiro reacopla os dominios, que sao fronteiras de deploy independentes (ver force-app/README.md). Aponte --source-dir para force-app/domains/<dominio>/main/default.',

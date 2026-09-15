@@ -1,6 +1,6 @@
 ---
 name: fsc-build
-description: Build and deploy one already-designed FSC capability, end to end, through fsc-build-orchestrator and the mandatory deploy gate.
+description: Build and deploy one already-designed FSC capability, end to end, through fsc-build-orchestrator (fast NoTestRun sandbox iterations by default; full deploy gate only on explicit user-requested finalization).
 argument-hint: <domain> <capability>
 arguments: [domain, capability]
 disable-model-invocation: true
@@ -52,7 +52,7 @@ quando o usuário pediu explicitamente o gate completo.
 - `references/permissionamento-odin-v2.md` — ODIN naming pattern for every permission set /
   custom permission (`[TipoArtefato]_[TipoProduto]_[Operação]_[Especificidade]_[NivelAcesso]`,
   EN labels, creation checklist). Read by `fsc-data-model-developer`.
-- `references/passos-manuais-deploy-template.md` — skeleton for the mandatory deliverable below.
+- `references/passos-manuais-deploy-template.md` — skeleton for the finalization-only deliverable below.
 
 ## Deliverable `docs/passos-manuais-deploy.md` (somente na finalização)
 
