@@ -113,7 +113,7 @@ A 3-column header is **one Block per column** (width `4`), each holding Text chi
 
 ### 6. Smoke-test the contract without the Designer
 
-Before asking a human to Fetch in the Designer, prove the data layer directly:
+Before asking a human to Fetch in the Designer, prove the data layer directly (rodar contra `--target-org CoreEvol`, com um recordId de teste da capacidade — nunca o Id de exemplo em produção):
 
 ```apex
 System.Callable c = (System.Callable) new Visao360FlexCardDS();
@@ -144,7 +144,7 @@ System.debug(JSON.serialize(args.get('output')));    // MUST match — this is w
 2. Read the Designer skill's validated prototype for this capability (`specs/<domain>/<NNN>-<slug>/prototype/`) for the screen/step design and interaction model it already confirmed with the business.
 3. Author the record content per the matching skill's guidance (`OmniUiCard`'s `DataSourceConfig`/`PropertySetConfig` JSON, or the OmniScript's Type/SubType/Language + element/`PropertySetConfig` structure), wiring its data source to the real Apex controller `fsc-apex-developer` built (never a raw, unreviewed SOQL binding for anything beyond the simplest read) — this is where the mock's fixture data path gets replaced with a real one, the same discipline `fsc-lwc-developer` applies on the LWC side.
 4. Respect the same standard-first discipline the Designer skill's UX agent already applied when it chose OmniStudio for this step: don't add configuration complexity beyond what the validated design actually needs.
-5. Materialize the record in the target org per the skill's documented flow (`sf data create record` / REST API for the initial `OmniUiCard`/`OmniProcess` + child element records, then the skill's deploy script to finalize/activate) — this happens against a real org, not as a local file write. (`sf data create record` is intentionally not pre-approved in `settings.json` — approve the permission prompt once; it is the human checkpoint on org mutation.) Keep a version-controlled JSON copy of the authored config under `force-app/domains/<domain>/main/default/omniStudio/<slug>.json` purely as this project's own source-of-truth record (not itself a deployable SFDX artifact) — never outside this capability's domain folder.
+5. Materialize the record in the target org per the skill's documented flow (`sf data create record` / REST API for the initial `OmniUiCard`/`OmniProcess` + child element records, then the skill's deploy script to finalize/activate) — this happens against a real org, not as a local file write, sempre com `--target-org CoreEvol` em todo comando/script. No dev, materializar como Draft/inativo (sem ativar); ativar somente na finalização sob pedido explícito. (`sf data create record` is intentionally not pre-approved in `settings.json` — approve the permission prompt once; it is the human checkpoint on org mutation.) Keep a version-controlled JSON copy of the authored config under `force-app/domains/<domain>/main/default/omniStudio/<slug>.json` purely as this project's own source-of-truth record (not itself a deployable SFDX artifact) — never outside this capability's domain folder.
 6. Report: which FlexCard/OmniScript artifacts you built, which Apex controller(s) they call, which of the prototype's validated acceptance scenarios they now demonstrate against real data, the SLDS scorecard result for any FlexCard, and any gap between `plan.md`'s classification and what you found while building for real.
 
 ## Your project memory

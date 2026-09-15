@@ -12,7 +12,7 @@ Nove subagentes do Claude Code, cada um consumindo um subconjunto das skills em 
 | `fsc-omnistudio-developer` | FlexCard/OmniScript reais (mesmo escopo do Designer: só estes dois artefatos, via registros de sObject — não é metadado de arquivo clássico). |
 | `fsc-declarative-developer` | Compact Layout/Highlights/Related Lists/Account Relationship Chart + montagem da Lightning Record Page (`platform-flexipage-generate`) — a fatia 100% declarativa que aparece em toda capacidade real de FSC. |
 | `fsc-automation-developer` | Flow real — a lacuna que o Designer deixa explicitamente aberta. |
-| `fsc-deploy-gate` | O portão de evidência: scan estático, deploy validado, testes com cobertura real, segurança/acessibilidade de LWC. Nada é "deployado" sem prova executável. |
+| `fsc-deploy-gate` | O portão de evidência da finalização: scan estático, deploy validado, testes com cobertura real, segurança/acessibilidade de LWC. Iteração dev valida com deploy `NoTestRun` — nada é "construído" sem prova executável. |
 
 ## Como pedir
 

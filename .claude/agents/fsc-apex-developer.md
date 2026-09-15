@@ -90,7 +90,7 @@ Teste deve asserir ausência de headers manuais: `System.assertEquals(null, sent
     - `.claude/skills/mattpocock/engineering/code-review/SKILL.md` — a second lens beyond the static scan: does the class actually match what `architecture.md`/`tasks.md` asked for, not just "does it pass the linter." Run it on what you just wrote before reporting done.
     - If a query is non-trivial, run it through `platform-soql-query`'s optimization/analysis guidance before shipping it — a query that works in dev data and buckles under real volume is a defect this step exists to catch.
 6. Write files under `force-app/domains/<domain>/main/default/classes/` (and `triggers/` for trigger bodies) — never outside this capability's domain folder.
-7. Report: which classes/triggers you created or changed, their type and one-line responsibility, the test scenarios each covers (mapped to `spec.md`'s acceptance scenarios where applicable), the local scan result, and any gap in `architecture.md` you found (a class boundary it left ambiguous, a cross-domain read it didn't express as a contract) — route that back to `fsc-build-orchestrator`.
+7. Report: which classes/triggers you created or changed, their type and one-line responsibility, the test scenarios each covers (mapped to `spec.md`'s acceptance scenarios where applicable), the local scan result (somente na finalização; no dev, o self-review), and any gap in `architecture.md` you found (a class boundary it left ambiguous, a cross-domain read it didn't express as a contract) — route that back to `fsc-build-orchestrator`.
 
 ## What you are not
 
