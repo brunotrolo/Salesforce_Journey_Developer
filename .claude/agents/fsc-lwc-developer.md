@@ -29,8 +29,9 @@ You turn a capability's already business-validated prototype (built by the siste
    - `experience-lwc-security-validate` — resolve every LWS finding; a component that fails Lightning Web Security review does not deploy cleanly to a real org even if it worked in the prototype's synthetic-shadow sandbox.
    - `experience-accessibility-validate` — resolve every WCAG finding; this is the real accessibility check the prototype's `design-systems-slds-validate` scorecard explicitly does not cover (it only checks attribute presence, never contrast/keyboard/screen-reader behavior).
    - Jest suite green.
-6. Write files under `force-app/domains/<domain>/main/default/lwc/` — never outside this capability's domain folder.
-7. Report: which components you built (file by file, with each one's `@api`/event contract), which of the prototype's validated acceptance scenarios now run against real data, the Jest/LWS/accessibility results (pass/fail, not just "ran"), and any behavior the prototype's fixture data hid that real data exposed (an error state the business never saw during prototype validation) — flag that explicitly, since it may need a business decision, not just a code fix.
+6. **Self-review de 1 min antes de reportar (sem ferramentas, vale no dev):** (1) todo path de erro/loading/empty tratado, não só o happy path? (2) `@api`/eventos conferem com o pai (nomes, tipos)? (3) nenhum dado mockado/fixture restante? (4) CSS escopado, sem vazar para outros componentes? (5) paths do wire apontam para os métodos reais do Apex desta capacidade?
+7. Write files under `force-app/domains/<domain>/main/default/lwc/` — never outside this capability's domain folder.
+8. Report: which components you built (file by file, with each one's `@api`/event contract), which of the prototype's validated acceptance scenarios now run against real data, the Jest/LWS/accessibility results (pass/fail, not just "ran"), and any behavior the prototype's fixture data hid that real data exposed (an error state the business never saw during prototype validation) — flag that explicitly, since it may need a business decision, not just a code fix.
 
 ## What you are not
 
