@@ -1,0 +1,30 @@
+# `force-app/` — layout por domínio
+
+Nenhum domínio existe aqui ainda neste template — as pastas abaixo nascem sob demanda, a primeira vez que `fsc-build-orchestrator` constrói uma capacidade daquele domínio (mesma disciplina "criar app entry na primeira vez, reusar depois" da skill irmã Designer).
+
+```
+force-app/
+  domains/
+    <domain-slug>/           # ex.: busca-cliente, atendimento — mesmo slug de specs/<domain>/ e docs/sdd/DOMAINS.md
+      main/default/
+        classes/             # fsc-apex-developer
+        triggers/             # fsc-apex-developer
+        lwc/                  # fsc-lwc-developer
+        messageChannels/      # fsc-lwc-developer — Lightning Message Service, quando componentes irmaos (nao pai-filho) precisam se desacoplar
+        omniStudio/           # fsc-omnistudio-developer — copia JSON versionada, NAO é metadado deployavel (ver nota abaixo)
+        flexipages/           # fsc-declarative-developer — montagem da Lightning Record Page (App Builder)
+        flows/                # fsc-automation-developer
+        objects/              # fsc-data-model-developer — inclui recordTypes dentro do proprio .object-meta.xml
+        namedCredentials/      # fsc-integration-developer
+        externalCredentials/   # fsc-integration-developer
+        platformEvents/        # fsc-integration-developer — eventos __e para consumo cross-domain
+        permissionsets/       # fsc-data-model-developer — único autor de PS/PSG/CP (padrão de nomenclatura); demais especialistas consomem, não criam
+```
+
+**Por que por domínio, e não um `force-app/main/default/` único**: cada domínio é uma fronteira de deploy independente (o mesmo princípio de micro-frontend que a skill Designer já aplica ao UI) — isso é o padrão "modular architecture" que a própria Salesforce recomenda para orgs grandes, e evita a mesma super-customização acoplada que motivou esta migração. `sf project deploy start --source-dir force-app/domains/<domain>/main/default` deploya só o domínio que mudou; nunca use `--source-dir force-app` inteiro para o deploy normal de uma capacidade — isso reacoplaria os domínios no processo de deploy, mesmo eles sendo independentes no código.
+
+**Exceção org-existente:** quando `fsc-build-orchestrator` registra modo org-existente para o projeto (layout flat existente, ex.: `force-app/main/default/` com 17k+ arquivos), cada especialista escreve sob esse layout existente em vez de `force-app/domains/<domain>/` — a regra de fronteira por domínio continua válida logicamente (nunca tocar artefatos de outro domínio), só a raiz física muda. O orquestrador declara a raiz efetiva no dispatch; em dúvida, perguntar a ele — nunca inventar um terceiro layout.
+
+**FlexCard/OmniScript não são arquivo de metadado clássico**: `OmniUiCard` e `OmniProcess` são registros de sObject (criados via `sf data create record`/REST API, finalizados pelos scripts próprios das skills `omnistudio-flexcard-generate`/`omnistudio-omniscript-generate`), não arquivos `-meta.xml` sob `force-app/`. `omniStudio/*.json` aqui é só a cópia versionada da configuração que `fsc-omnistudio-developer` autorou — útil para diff/revisão em PR — não algo que `sf project deploy start --source-dir` consuma.
+
+`_fundacao/` (modelo de dados/segurança compartilhado, sem UI) não é um domínio de produto — seu metadado (objetos, campos, permission sets base) fica em `force-app/domains/_fundacao/main/default/`, e é o único domínio que os outros legitimamente dependem de deploy.

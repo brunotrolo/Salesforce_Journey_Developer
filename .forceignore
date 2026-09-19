@@ -1,0 +1,10 @@
+# Standard sf/SFDX ignore — see https://developer.salesforce.com/tools/vscode/en/user-guide/forceignore
+
+**/jsconfig.json
+**/.eslintrc.json
+**/__tests__/**
+**/*.test.js
+
+# LWC Jest/dev tooling that shouldn't deploy
+**/__mocks__/**
+**/*.stories.js
