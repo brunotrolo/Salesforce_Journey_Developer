@@ -12,9 +12,6 @@
   <img src="https://img.shields.io/badge/works%20with-Claude%20Code-032D60?style=flat-square" alt="Works with Claude Code">
 </p>
 
-<p align="center">
-  [![skills.sh](https://skills.sh/b/brunotrolo/Salesforce_Journey_Developer)](https://skills.sh/brunotrolo/Salesforce_Journey_Developer) [![CI](https://github.com/brunotrolo/Salesforce_Journey_Developer/actions/workflows/ci.yml/badge.svg)](https://github.com/brunotrolo/Salesforce_Journey_Developer/actions)
-</p>
 
 Constrói e deploya de verdade o que a skill irmã **[Salesforce Journey Designer](https://github.com/brunotrolo/Salesforce_Journey_Designer)** especifica, desenha e prototipa. O Designer leva uma capacidade de ideia a `tasks.md` + `architecture.md`, validados com o negócio via protótipo LWC real; este repositório pega esse resultado e produz metadado Salesforce real — Apex, LWC de produção, FlexCard/OmniScript, Flow, modelo de dados — deployado e verificado num org de verdade, nunca só "parece pronto no código-fonte".
 
