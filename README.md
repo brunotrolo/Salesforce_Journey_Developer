@@ -120,11 +120,12 @@ Depois, abra o Claude Code na pasta do projeto — os 9 agentes, as rules e os c
 
 ### O que o `settings.json` impede na prática
 
-Permissões cobrem o óbvio (`sf org delete`, `sf data delete`, `rm -rf`, `git push --force`, leitura de `.env`/`*.key` negados; comandos `sf` de leitura e os testes pré-aprovados). O hook `.claude/hooks/guard-deploy.mjs` cobre os quatro casos que **derrotariam o portão de evidência em silêncio** — e por isso são bloqueio, não prosa:
+Permissões cobrem o óbvio (`sf org delete`, `sf data delete`, `rm -rf`, `git push --force`, leitura de `.env`/`*.key` negados; comandos `sf` de leitura e os testes pré-aprovados). O hook `.claude/hooks/guard-deploy.mjs` cobre os casos que **derrotariam o portão de evidência em silêncio, ou fugiriam do escopo exato pedido** — e por isso são bloqueio, não prosa:
 
 - `--ignore-errors`/`--ignore-warnings` num deploy (esconde falha real);
-- `--test-level NoTestRun` num deploy de verdade (pula a evidência de teste);
+- deploy com teste (`--test-level` diferente de `NoTestRun`) sem `FSC_HEAVY_TESTS_APPROVED=1` (pula a aprovação explícita do modo pesado);
 - `--source-dir force-app` inteiro (reacopla os domínios, que são fronteiras de deploy independentes);
+- `--source-dir` em deploy de ciclo rápido (`--test-level NoTestRun`) — esse modo é sempre `--metadata <Tipo>:<Nome>`, nunca pasta inteira (ver "Deploying an artifact" em `.claude/rules/journey-developer.md`);
 - `sf org delete` / `sf data delete`;
 - deploy/teste sem `--target-org`, ou apontado para uma org diferente de `$FSC_TARGET_ORG` (ver Instalação).
 

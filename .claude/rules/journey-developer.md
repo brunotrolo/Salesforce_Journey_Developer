@@ -37,6 +37,19 @@ One folder per domain, each an independent deploy boundary:
 `force-app/domains/<domain-slug>/main/default/<type>/` — see `force-app/README.md` for the
 full layout. Never write a capability's metadata outside its own domain folder, and never
 deploy `--source-dir force-app` wholesale for a single capability.
+
+## Deploying an artifact (sandbox cycle)
+
+Whenever asked to deploy one or more artifacts in the fast sandbox cycle (not the
+finalization gate), the command is always `sf project deploy start --target-org
+"$FSC_TARGET_ORG" --metadata <Type>:<Name> --test-level NoTestRun` — comma-separate
+multiple artifacts in one call (`--metadata ApexClass:Foo,LightningComponentBundle:bar`),
+never `--source-dir`. Example: `sf project deploy start --target-org "$FSC_TARGET_ORG"
+--metadata ApexClass:LogEntryEventBuilder --test-level NoTestRun`.
+`guard-deploy.mjs` enforces this mechanically (denies `--source-dir` combined with
+`--test-level NoTestRun`). This does not apply to `fsc-deploy-gate`'s finalization phases,
+which deliberately use `--source-dir`/`--manifest` for full dependency-closure deploys
+(see that agent's Rec 4) — a different concern from an ad-hoc sandbox push.
 **Org-existente exception:** when `fsc-build-orchestrator` registered org-existente mode for
 the project (existing flat layout, e.g. `force-app/main/default/`), every specialist writes
 under that existing layout instead of `force-app/domains/<domain>/` — the domain-boundary

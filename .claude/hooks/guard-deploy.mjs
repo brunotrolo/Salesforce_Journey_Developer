@@ -108,6 +108,24 @@ const RULES = [
       'Deploy de force-app inteiro reacopla os dominios, que sao fronteiras de deploy independentes (ver force-app/README.md). Aponte --source-dir para force-app/domains/<dominio>/main/default.',
   },
   {
+    // Ciclo rapido de sandbox (assinatura: --test-level NoTestRun) deploya
+    // artefato por artefato via --metadata <Tipo>:<Nome> -- nunca --source-dir,
+    // que aqui reintroduziria a imprecisao que --metadata existe para evitar.
+    // O gate de finalizacao (--test-level RunLocalTests, ver regra acima que
+    // exige FSC_HEAVY_TESTS_APPROVED=1 sem NoTestRun) continua livre para usar
+    // --source-dir/--manifest: ali a closure de dependencias e proposital
+    // (fsc-deploy-gate.md, Rec 4) -- um caso diferente deste.
+    test: (c) =>
+      sfSegments(c).some(
+        (s) =>
+          DEPLOY_START.test(s) &&
+          NO_TEST_RUN.test(s) &&
+          /--source-dir\b/.test(s)
+      ),
+    reason:
+      'Deploy de ciclo rapido (--test-level NoTestRun) deve escopar por artefato exato: --metadata <Tipo>:<Nome> (multiplos artefatos: --metadata Tipo1:Nome1,Tipo2:Nome2), nunca --source-dir. Ex.: --metadata ApexClass:LogEntryEventBuilder.',
+  },
+  {
     test: (c) => /\bsf\b[^|;&]*\b(org\s+delete|data\s+delete)\b/.test(c),
     reason:
       'Comando destrutivo de org/dados nao passa por um agente de build. Se realmente for necessario, rode manualmente no seu terminal, fora do Claude Code.',
