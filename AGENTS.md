@@ -19,6 +19,17 @@ years.
 `force-app/` in this repo is the **layout skeleton** the agents write into, not a real
 project's code.
 
+This repo already delegates to subagents: `.claude/agents/` holds 9 authored agents (an
+orchestrator, 7 specialists and `fsc-deploy-gate`), not a flat single-agent setup. Real
+deploys and test runs go through the `sf` CLI directly — deliberately, not via an MCP
+abstraction. Same reasoning as the deploy-guard pattern: a real-mutation command needs
+explicit, inspectable flags (`--target-org`, `--metadata <Type>:<Name>`, `--test-level`) that
+a `PreToolUse` hook can parse and gate, not a tool call whose arguments an MCP server could
+reshape before they reach the org.
+
+Before starting any deploy-related task, read `.claude/LESSONS.md` — it is this repo's
+append-only self-improvement log of deploy-guard corrections.
+
 ## Behavioral discipline
 
 `.claude/rules/karpathy-guidelines.md` applies to work **on this repository** as much as to
@@ -115,6 +126,23 @@ force-app/               # layout skeleton the agents write into
 - [ ] No imported/third-party skill rewritten
 - [ ] No real names reintroduced
 - [ ] README reflects structural changes (counts, rules table, phases)
+
+## Alignment with the agentic framework
+
+- **Self-improvement / lessons.** `.claude/LESSONS.md` is the append-only log of corrections
+  to this repo's agents and hooks (date, what happened, rule that resulted). Read it before
+  any deploy-related task; append to it, never edit past entries.
+- **Verification before done.** `.claude/hooks/guard-deploy.mjs` is the enforcement
+  mechanism, not a style guide — its `RULES` array mechanically denies the Bash commands that
+  would defeat the evidence gate or the per-domain deploy boundary (missing/wrong
+  `--target-org`, `--ignore-errors`/`--ignore-warnings`, heavy runs without
+  `FSC_HEAVY_TESTS_APPROVED=1`, a whole-`force-app` deploy, and a `NoTestRun` sandbox deploy
+  using `--source-dir` instead of `--metadata <Type>:<Name>`). A specialist report is not
+  "done" on an unerrored command; it is done when the gate cites the command, its exit code
+  and the JSON field that proves the outcome.
+- **MCP vs. `sf` CLI.** See "What this repository is" above — deploys go through the `sf` CLI
+  directly, not an MCP abstraction, for the same explicit-command-control reason the
+  deploy-guard pattern exists.
 
 ## Third-party licenses
 

@@ -40,6 +40,9 @@ deploy `--source-dir force-app` wholesale for a single capability.
 
 ## Deploying an artifact (sandbox cycle)
 
+Read `.claude/LESSONS.md` before any deploy-related task — it is this repo's append-only log
+of deploy-guard corrections, and a past correction there is not to be relearned the hard way.
+
 Whenever asked to deploy one or more artifacts in the fast sandbox cycle (not the
 finalization gate), the command is always `sf project deploy start --target-org
 "$FSC_TARGET_ORG" --metadata <Type>:<Name> --test-level NoTestRun` — comma-separate
