@@ -79,13 +79,30 @@ Ao menos 1 teste negativo com `System.runAs(userSemPS)` provando que a restriç�
 **Rec 16 — Callout header assertion (obrigatório em toda classe que usa Named Credential):**
 Teste deve asserir ausência de headers manuais: `System.assertEquals(null, sent.getHeader('Authorization'))` e `System.assertEquals(null, sent.getHeader('Cookie'))`. Um callout com `Authorization` preenchido quando a auth é via Named Credential é um bug de segurança.
 
+**Rec 25 — Classe de teste autocontida (validado pelo time usando a skill irmã apex-test-loop):**
+Uma classe de teste bateu a meta de cobertura localmente mas quebrou o deploy real em
+**PRODUÇÃO** porque fazia uma query SOQL a um artefato de configuração da org que não
+existia naquele ambiente. Dois vetores proibidos, sempre, em qualquer `*Test.cls`:
+- **Nunca** `[SELECT ... FROM RecordType|Profile|PermissionSet|PermissionSetGroup|
+  Queue|Group|UserRole|BusinessHours|Organization WHERE Name = '...'/DeveloperName =
+  '...']` assumindo que a linha existe no ambiente de destino — essas são linhas de
+  configuração, variam por org e **não podem ser inseridas pelo teste**. Se a produção
+  precisa do Id, use describe (`Schema.SObjectType.<Objeto>.
+  getRecordTypeInfosByDeveloperName()`), nunca SOQL literal por nome. (Isto é diferente
+  de inserir seus próprios registros de negócio via factory — ver Rec 9 — que é o
+  padrão correto e esperado.)
+- **Nunca** chamar um método estático de criação de dados/setup de OUTRA classe
+  `*Test` (acopla a suíte à ordem/estado de uma suíte diferente). Cada classe de teste
+  cria os próprios dados — via `@TestSetup`/factory dedicada, nunca por efeito
+  colateral de outra classe de teste.
+
 ## Process
 
 1. Read `architecture.md` for this capability's Apex artifacts (which classes, their type, what they read/write) and `spec.md`'s acceptance scenarios (each one needs a corresponding test scenario — that's the actual acceptance proof, not just line coverage).
 2. **Discover project conventions first**: existing classes/triggers in this domain's `force-app/domains/<domain>/main/default/classes/`, the trigger-handler pattern already in use, existing selectors/services to extend rather than duplicate.
 3. Author with guardrails from `platform-apex-generate`: `with sharing` by default, bulkified (no SOQL/DML inside a loop), CRUD/FLS-aware for any DML/query touching user-supplied context, governor-limit-safe for batch/async work.
 4. Author the test class immediately after (or alongside) the production class — cover positive path, negative/exception path, bulk path, and the callout/async path if the class has one. A class with 75%-by-accident coverage and no negative-path assertion is not done. Apply all patterns in "Padrões obrigatórios de teste" above. (Regra do fast-path: teste nasce junto na mesma iteração — a execução fica para a finalização com `FSC_HEAVY_TESTS_APPROVED=1`; o check pré-finalização cobra a existência da `*Test.cls`.)
-5. **Self-review de 1 min antes de reportar (sem ferramentas, vale no dev):** (1) SOQL/DML fora de loop? (2) `with sharing` + FLS/runAs considerados? (3) null-guards nos retornos de query/callout? (4) o teste cobre positivo + negativo + bulk (+callout/async se houver)? (5) assinaturas alinhadas com quem chama (`architecture.md`)? **Na finalização**, somar os checks pesados abaixo (this capability's files only, not the whole repo):
+5. **Self-review de 1 min antes de reportar (sem ferramentas, vale no dev):** (1) SOQL/DML fora de loop? (2) `with sharing` + FLS/runAs considerados? (3) null-guards nos retornos de query/callout? (4) o teste cobre positivo + negativo + bulk (+callout/async se houver)? (5) assinaturas alinhadas com quem chama (`architecture.md`)? (6) o teste é autocontido — nenhuma query literal a RecordType/Profile/PermissionSet/Queue/Group/UserRole por Name/DeveloperName, nenhuma chamada a método estático de outra classe `*Test` (Rec 25)? **Na finalização**, somar os checks pesados abaixo (this capability's files only, not the whole repo):
     - `dx-code-analyzer-run` against every `.cls`/`.trigger` you touched — fix every High/Critical finding, or write down why it's a false positive; never silently suppress.
     - `.claude/skills/mattpocock/engineering/code-review/SKILL.md` — a second lens beyond the static scan: does the class actually match what `architecture.md`/`tasks.md` asked for, not just "does it pass the linter." Run it on what you just wrote before reporting done.
     - If a query is non-trivial, run it through `platform-soql-query`'s optimization/analysis guidance before shipping it — a query that works in dev data and buckles under real volume is a defect this step exists to catch.
