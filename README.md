@@ -221,24 +221,6 @@ Uma capacidade só é dada como "construída" quando `fsc-deploy-gate` reporta c
 
 19 vêm de [`forcedotcom/sf-skills`](https://github.com/forcedotcom/sf-skills) (oficiais da Salesforce, Apache-2.0) — as 6 que o Designer já usa para prototipar, mais 13 novas específicas de build/deploy real (teste Apex, deploy via `sf`, scan estático, permission set, Flow, SOQL, modelo de dados, segurança/acessibilidade de LWC, integração/Named Credential/Platform Event, montagem de Lightning Record Page). As outras 5 (3 + 2) são disciplina de engenharia curada seletivamente de dois repositórios que também inspiraram este projeto — [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) e [`mattpocock/skills`](https://github.com/mattpocock/skills) — nenhum deles é específico de Salesforce, então nenhum foi adotado por inteiro como dependência dos 9 agentes: de cada um foi curado só o subconjunto que realmente reforça um pipeline de deploy real (a disciplina de evidência `CHECK:`/`EXPECT:`/`ABANDON:`, herdada do `unlazy`, vive inlineada em prosa no `fsc-deploy-gate`, sem diretório vendored). A análise completa, skill por skill, está em [`.claude/skills/README.md`](.claude/skills/README.md).
 
-## Engenharia reversa: o que mudou depois de analisar jornadas reais do Designer
-
-Os 2 agentes (`fsc-integration-developer`, `fsc-declarative-developer`) e as 2 skills novas acima vieram de analisar `architecture.md`/`tasks.md` de duas capacidades reais construídas pelo Journey Designer (`busca-cliente/001`, `household-360/001`). Achados concretos:
-
-- **Integração é sistemática, não exceção.** Uma única capacidade real (`busca-cliente/001`) tinha **5 Named Credentials** para 5 sistemas externos distintos, cada um com timeout próprio, mais um Platform Event para propagação cross-domain. Nenhum dos 7 agentes originais tinha essa responsabilidade — ficaria implicitamente "em algum lugar" dentro do `fsc-apex-developer`, o que é errado: Named Credential/External Credential é metadado de conectividade, não Apex.
-- **Boa parte de uma capacidade FSC real é 100% declarativa.** `household-360/001` tem tasks inteiras (`Header 3 colunas (padrão)`, `ARC em grupos + Details (padrão, config)`, `App Builder da página (montagem)`) que não são Apex, LWC, FlexCard, OmniScript nem Flow — são Compact Layout, Account Relationship Chart e montagem de Lightning Record Page. Sem um agente dono disso, o orquestrador não tinha para onde despachar essas tasks.
-- **Lightning Message Service é o padrão real, não `@api`/eventos.** As duas jornadas desacoplam 5+ componentes irmãos (não pai-filho) via `messageChannel-meta.xml` — um canal por contexto compartilhado da capacidade, não um `@api` encadeado. Isso não estava em nenhuma instrução do `fsc-lwc-developer` original.
-- **Gap real, sem skill disponível**: nenhum dos 3 catálogos importados (nem o oficial da Salesforce) cobre a vertical **Financial Services Cloud** especificamente — Account Relationship Chart, modelo de Financial Accounts, Life Events, Relationship Groups. `fsc-declarative-developer` documenta isso explicitamente e resolve com conhecimento de plataforma em prosa, mas se você tiver acesso a um pacote de skills oficial da Salesforce específico para FSC (Salesforce não publica um no `forcedotcom/sf-skills` até onde vimos), vale importar — é a lacuna mais concreta que resta.
-
-## Rodadas de consistência aplicadas
-
-Esta skill passou por múltiplas rodadas de análise de consistência com subagentes paralelos. Cada rodada identificou e corrigiu achados reais — não são melhorias teóricas, são correções baseadas em lições do piloto `resgate-pontos`:
-
-- **Rodada 1 (piloto → skill)**: Recs 7, 11, 16 inlineados no apex-developer para que um agente fresco aplique sem carregar 3 docs. Rec 14 agora exige evidência de chamada real HML no build-report.
-- **Rodada 2 (handoffs)**: dispatch envelope definido, report contract estruturado, failure routing mecânico, pipeline status para recovery.
-- **Rodada 3 (redundância)**: regras canonicas consolidadas em `journey-developer.md`, PS scope proibido em todos os agentes não-modelo.
-- **Rodada 4 (experience)**: validação de status, iteration cap, `/fsc-status` descobertável, handoff failure documentado no README.
-
 ---
 
 ## 📋 Resumo — input, o que faz, o que entrega
