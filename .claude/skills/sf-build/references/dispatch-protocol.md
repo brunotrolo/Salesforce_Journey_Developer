@@ -20,7 +20,7 @@ State the effective metadata root (greenfield: `force-app/domains/<domain>/main/
 | `sf-data-model-developer` | custom objects, fields, Record Types, `BusinessProcess` (Case support process), `Knowledge__kav` article fields, field-level permission sets |
 | `sf-integration-developer` | Named/External Credentials, callout wiring, Platform Events, `passos-manuais-deploy` section |
 | `sf-apex-developer` | classes, triggers, `@InvocableMethod` actions, Apex tests |
-| `sf-service-config-developer` | Queues, Assignment/Escalation/Auto-response Rules, Entitlement Processes/Milestones/Business Hours, Omni-Channel (Service Channel, routing config, presence config, skills), Knowledge settings and Data Categories, Macros/Quick Text, Case Team, Email-to-Case |
+| `sf-service-config-developer` | Queues, Assignment/Escalation/Auto-response Rules, Entitlement Processes, Milestone Types, Entitlement Templates, Business Hours, Omni-Channel (Service Channel, routing config, presence config, skills), Knowledge settings and Data Categories, Macros/Quick Text, Case Team, Email-to-Case |
 | `sf-lwc-developer` | production LWC bundles and Jest tests |
 | `sf-automation-developer` | Flows (Screen via Flow for Service, autolaunched, record-triggered, scheduled) |
 | `sf-declarative-developer` | FlexiPages, page layouts, Compact Layouts, quick actions, apps (incl. Service Console + utility bar), list views |

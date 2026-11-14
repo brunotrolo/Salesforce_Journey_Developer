@@ -104,7 +104,7 @@ Se a seção estiver ausente ou incompleta, **falhar o gate** e rotear de volta 
 
 7. **Service Cloud configuration evidence, if the capability includes `sf-service-config-developer` output** (queues, rules, Entitlement Processes, Omni-Channel, Knowledge settings)
    - For each configuration artifact deployed, prove it exists **and is in the intended state** with a read-only query. First confirm the sObject exists in the target org (`sf sobject describe --sobject <Name> --target-org <alias> --json`); if the describe fails, that check is an explicit `ABANDON: <sObject> not available in this org/API version` — never guess a name.
-   - Candidate objects (confirm each by describe before use): `Group` with `Type = 'Queue'` (queues), `AssignmentRule` (active rule per object), `SlaProcess` (Entitlement Process, `IsActive`), `QueueRoutingConfig` (Omni-Channel routing), `ServiceChannel`, `PresenceUserConfig`.
+   - Candidate objects (confirm each by describe before use): `Group` with `Type = 'Queue'` (queues), `AssignmentRule` (active rule per object), `SlaProcess` (Entitlement Process, `IsActive`), `MilestoneType`, `QueueRoutingConfig` (Omni-Channel routing), `ServiceChannel`, `PresenceUserConfig`.
    - **CHECK**: `sf data query --query "<read-only SOQL/Tooling query>" --target-org <alias> --json` per artifact. **EXPECT**: the row exists and `IsActive`/`Active` (where applicable) matches the plan — e.g. exactly one active assignment rule for the object. A rule or process that deployed but is inactive is a failure routed back to `sf-service-config-developer`.
 
 8. **Post-deploy report**
