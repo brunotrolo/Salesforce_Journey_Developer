@@ -12,8 +12,9 @@ Run the evidence gate against the capability **`$capability`** in domain **`$dom
 standalone — no building, no fixing.
 
 Dispatch the `sf-deploy-gate` subagent for it. That agent owns the phases and their exact
-commands. Its own scope note applies: FlexCard/OmniScript are verified as `OmniUiCard`/
-`OmniProcess` records with `IsActive = true` via `sf data query`, not by a deploy job id.
+commands. Its own scope note applies: Service Cloud configuration (queues, rules, Entitlement
+Processes, Omni-Channel) is verified by read-only queries of its active state, not only by a
+deploy job id.
 
 If the gate cannot run at all — no `sf` CLI, no authenticated org, code analyzer or Java
 missing — report exactly that. Never simulate a deploy or judge the metadata by reading it.

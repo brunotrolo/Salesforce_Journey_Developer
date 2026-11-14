@@ -20,23 +20,18 @@ capacidade em **Produção** ou em **outra Sandbox** na esteira. Manifest:
 
 **1.1 Dependências de infra (confirmar existência):**
 - [ ] Apex de infra: `<Classe1>, <Classe2>, ...`.
-- [ ] Pacote **Nebula Logger** instalado (objetos `LogEntry__c`, ...).
+- [ ] Se o projeto usa Nebula Logger: pacote instalado (objetos `LogEntry__c`, ...).
 - [ ] Campos/objetos existentes: `<Objeto.Campo>`, ... Record Type `<Nome>`.
 
 **1.2 Credencial do parceiro (auth):**
 - [ ] `NamedCredential` **<Base>** + `ExternalCredential` **EC_<Base>**.
-- [ ] Em sandbox: variantes `<Base>_Dev` / `EC_<Base>_Dev` (o conector sufixa `_Dev`).
-      ⚠️ Não guardar `_Dev` no nome-base da lookup — vira `_Dev_Dev`.
+- [ ] Em sandbox: usar o nome de credencial do ambiente, nunca um endpoint ou segredo no código.
+- [ ] Allowlist de rede / firewall do parceiro para os hosts da integração.
 
-**1.3 Rotas do parceiro (Lookup Table / Decision Matrix `<Nome>`):**
-- [ ] Versão **ATIVA** com as N linhas (criar via toggle disable→insert→enable — a matriz habilitada é
-      imutável; o toggle exige autorização explícita registrada no `build-report.md`):
-  | DeveloperName (chave) | EndPoint | Method | Timeout |
-  |---|---|---|---|
-  | `<Chave>` | `<path>` | POST | 120000 |
-
-  ⚠️ **Não deployar** `DecisionMatrixDefinition/<Nome>` a partir do source — o source
-  local NÃO contém as linhas (dado de org); incluir no manifest apagaria a matriz.
+**1.3 Configuração só-Setup (não implantável por Metadata API):**
+- [ ] `<item de configuração feito manualmente em Setup, com o caminho do menu e os valores exatos>`
+      (ex.: configuração de site Experience Cloud, ou um tipo de metadado que a API não implanta).
+      Remover esta seção se a capacidade não tiver nenhum.
 
 **1.4 Negócio (pendências fora do contrato provado):**
 - [ ] `<item confirmado com o parceiro que ainda está fora do contrato HML>`.
@@ -48,15 +43,15 @@ capacidade em **Produção** ou em **outra Sandbox** na esteira. Manifest:
 Regra de ordem: **CustomPermission/PS → Apex → MessageChannel → LWC → demais**.
 
 ```bash
-# Passo 1 — permissões + Apex
+# Passo 1 — permissões + Apex (finalização: validar antes com --dry-run)
 sf project deploy start --target-org <ORG> \
-  --source-dir force-app/... \
-  --test-level NoTestRun
+  --metadata PermissionSet:<Nome>,ApexClass:<Classe> \
+  --test-level RunLocalTests
 
 # Passo 2 — mensageria + LWC (ordem: canal antes dos LWCs que o importam)
 sf project deploy start --target-org <ORG> \
-  --source-dir force-app/... \
-  --source-dir force-app/...
+  --metadata LightningMessageChannel:<Canal>,LightningComponentBundle:<Componente> \
+  --test-level RunLocalTests
 ```
 
 ---
@@ -67,7 +62,7 @@ sf project deploy start --target-org <ORG> \
 - [ ] Não atribuir a **<grupo excluído>** (deve NÃO ver — `<critério de aceite>`).
 - [ ] **1 chamada real HML — somente na finalização** com dado de teste + verificar:
       (a) resposta `<status + corpo>`, (b) DML resultante `<campo>`, (c) trilha `<campo>`,
-      (d) N entradas no `LogEntry__c` (Nebula).
+      (d) se o projeto usa Nebula Logger, N entradas no `LogEntry__c`.
 - [ ] Rodar suíte — somente na finalização com `SF_HEAVY_TESTS_APPROVED=1`: `sf apex run test --target-org <ORG> --class-names <T1,T2> --result-format human`.
 - [ ] **Rollback:** `<comando ou procedimento de reversão, se aplicável>`.
 ```

@@ -12,8 +12,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
-      - name: Verify SKILL.md frontmatter
+      - name: Verify SKILL.md and agent frontmatter
         run: node scripts/verify-skills.mjs
+      - name: Verify Service Cloud scope (no out-of-scope content)
+        run: node scripts/verify-scope.mjs
+      - name: Hook tests (guard-deploy)
+        run: node --test .claude/hooks/tests/*.test.mjs
+      - name: Pre-finalization script smoke
+        run: node .claude/skills/sf-build/scripts/pre-finalizacao-check.mjs || [ $? -eq 2 ]
       - name: List discoverable skills (telemetry)
         run: npx -y skills add . --list --json | head -c 4000; echo
 
@@ -47,8 +53,8 @@ jobs:
         run: |
           echo "Checking for --ignore-errors / NoTestRun in skills..."
           ! grep -R "ignore-errors" .claude --include="*.md" 2>/dev/null || (echo "❌ --ignore-errors encontrado" && exit 1)
-          # NoTestRun só permitido quando documentado como "quick deploy escopado"
-          if grep -R "NoTestRun" .claude --include="*.md" 2>/dev/null | grep -v "quick deploy escopado" | grep -v "NoTestRun.*quick" | grep -q "NoTestRun"; then
-            echo "⚠️ NoTestRun encontrado fora do contexto permitido — revise"
+          # NoTestRun em docs só com --metadata (o hook nega --source-dir + NoTestRun)
+          if grep -RnE --include="*.md" -e "--source-dir.*NoTestRun" .claude 2>/dev/null | grep -v "nunca\|never\|negado\|denied\|denies\|bloqueia" | grep -q .; then
+            echo "❌ doc manda --source-dir com NoTestRun (o guard-deploy nega)"; exit 1
           fi
           echo "✓ guard OK"

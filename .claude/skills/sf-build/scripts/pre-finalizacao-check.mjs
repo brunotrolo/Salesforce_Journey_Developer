@@ -2,13 +2,13 @@
 // pre-finalizacao-check.mjs — check de ~30s antes de pedir a finalização.
 // Pega as 3 causas mais comuns de gate falhando de primeira, sem rodar nada pesado:
 //   1) classe Apex sem *Test.cls (cobertura vai platinar no gate);
-//   2) manifest com DecisionMatrixDefinition/WebServiceEndpoint nos members (apagaria a matriz ativa);
-//   3) capacidade ausente no BACKLOG ou sem status "pronto para build".
+//   2) manifest vazio ou com wildcard <members>*</members> (deployaria além da capacidade);
+//   3) capacidade ausente no BACKLOG ou sem status "pronto para build" (ou posterior).
 //
 // Uso:
 //   node pre-finalizacao-check.mjs --root <metadata-root>
 //     [--manifest manifest/package-<cap>.xml]
-//     [--backlog docs/sdd/BACKLOG.md --slug <NNN-slug>]
+//     [--backlog docs/sdd/BACKLOG.md --domain <dominio> --slug <NNN-slug>]
 //
 // Sai com exit 1 se algum check FAIL; WARN não reprova. Só Node stdlib.
 
@@ -24,6 +24,7 @@ const root = arg('--root');
 const manifest = arg('--manifest');
 const backlog = arg('--backlog');
 const slug = arg('--slug');
+const domain = arg('--domain');
 
 let fails = 0;
 let warns = 0;
@@ -61,25 +62,39 @@ if (manifest) {
     fail(`manifest não encontrado: ${manifest}`);
   } else {
     const xml = readFileSync(manifest, 'utf8');
-    const bad = ['DecisionMatrixDefinition', 'WebServiceEndpoint'].filter((t) =>
-      new RegExp(`<name>${t}<\\/name>`).test(xml)
-    );
-    if (bad.length === 0) pass(`manifest ${manifest} sem DecisionMatrixDefinition/WebServiceEndpoint nos members.`);
-    else fail(`manifest inclui ${bad.join(', ')} nos members — mover para header-comment (apagaria a matriz ativa).`);
+    // Membros fora de comentário: dependências ficam como header-comment, nunca em <members>.
+    const body = xml.replace(/<!--[\s\S]*?-->/g, '');
+    if (!/<types>/.test(body)) fail(`manifest ${manifest} sem nenhum <types> — vazio?`);
+    else if (/<members>\s*\*\s*<\/members>/.test(body)) fail(`manifest ${manifest} usa wildcard <members>*</members> — listar só os artefatos da capacidade (nunca o domínio inteiro).`);
+    else pass(`manifest ${manifest} escopado (sem wildcard).`);
   }
 } else {
-  warn('sem --manifest: pulando check de DecisionMatrixDefinition/WebServiceEndpoint.');
+  warn('sem --manifest: pulando check de escopo do manifest.');
 }
 
-// --- Check 3: BACKLOG ---
+// --- Check 3: status da capacidade no BACKLOG ---
+// Formato do BACKLOG do Designer: seção "## `<dominio>/`" e linhas "| NNN | ... | <status> |".
+const READY = ['pronto para build', 'em build', 'concluído'];
 if (backlog && slug) {
   if (!existsSync(backlog)) {
     fail(`BACKLOG não encontrado: ${backlog}`);
   } else {
+    const id = (slug.match(/^(\d+)/) || [])[1];
     const md = readFileSync(backlog, 'utf8');
-    if (!md.includes(slug)) fail(`slug "${slug}" ausente em ${backlog}.`);
-    else if (/pronto para build/.test(md)) pass(`slug "${slug}" presente no BACKLOG com status.`);
-    else warn(`slug "${slug}" presente, mas sem "pronto para build" visível — conferir status.`);
+    let section = md;
+    if (domain) {
+      const m = md.split(/^## /m).find((sec) => sec.startsWith('`' + domain + '/`') || sec.startsWith(domain));
+      if (!m) fail(`domínio "${domain}" não encontrado em ${backlog}.`);
+      else section = m;
+    }
+    const row = id && section.split('\n').find((l) => new RegExp(`^\\|\\s*${id}\\s*\\|`).test(l));
+    if (!row) fail(`capacidade "${slug}"${domain ? ` do domínio ${domain}` : ''} sem linha em ${backlog}.`);
+    else {
+      const status = row.split('|').map((c) => c.trim()).filter(Boolean).pop().toLowerCase();
+      if (READY.includes(status)) pass(`capacidade ${domain || ''}/${slug}: status "${status}".`);
+      else fail(`capacidade ${domain || ''}/${slug}: status "${status}" — esperado ao menos "pronto para build".`);
+    }
+    if (!domain) warn('sem --domain: a linha foi procurada no BACKLOG inteiro (IDs repetem entre domínios).');
   }
 } else if (backlog || slug) {
   warn('informe --backlog e --slug juntos para o check de BACKLOG.');

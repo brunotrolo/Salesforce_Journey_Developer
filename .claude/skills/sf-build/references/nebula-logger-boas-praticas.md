@@ -1,12 +1,14 @@
 # Nebula Logger — Boas práticas e requisitos obrigatórios
 
-Referência de logging para **todas as capacidades com integração**. Origem: aprendizados
-provados na jornada `resgate-pontos` (chamadas reais HML, queries em `LogEntry__c`, testes e
-deploys). Tudo abaixo é **obrigatório** em novo desenvolvimento, salvo exceção registrada no
-`build-report.md`.
+Referência de logging para capacidades com integração **em projetos que usam o framework
+Nebula Logger** (pacote de terceiros, não faz parte de uma org Service Cloud padrão; se o
+projeto não o instalou, esta referência não se aplica). Aprendizados provados em chamadas
+reais ao ambiente de homologação, queries em `LogEntry__c`, testes e deploys. Com o
+framework em uso, tudo abaixo é **obrigatório** em novo desenvolvimento, salvo exceção
+registrada no `build-report.md`.
 
-> **Verificar na org-alvo antes de assumir:** namespace do pacote (na org de origem era
-> **sem namespace**: objetos `Log__c` / `LogEntry__c` / `LogEntryEvent__e`, Nebula v4.19.2).
+> **Verificar na org-alvo antes de assumir:** namespace do pacote (instalação típica
+> **sem namespace**: objetos `Log__c` / `LogEntry__c` / `LogEntryEvent__e`).
 > Confirmar via `sf data query` na primeira capacidade do projeto e registrar no `build-report.md`.
 
 ## 1. Onde ver os logs (runbook)
@@ -23,7 +25,7 @@ deploys). Tudo abaixo é **obrigatório** em novo desenvolvimento, salvo exceç�
 | Situação | Level | Quem gera |
 |---|---|---|
 | Chamada HTTP 2xx concluída | `INFO` | classe base de integração (`doRequest()`-equivalente) |
-| Entrada de negócio (ex.: accrual enviado, resgate concluído) | `INFO` | código da capacidade |
+| Entrada de negócio (ex.: solicitação enviada, caso encerrado) | `INFO` | código da capacidade |
 | Falha HTTP 4xx/5xx, timeout, `CalloutException` | `ERROR` | classe base via `logError()` |
 | Falha auxiliar que não quebra o sucesso (ex.: caso de evidência) | `INFO` com prefixo `ATENÇÃO:` | código da capacidade |
 
@@ -48,9 +50,9 @@ re-lançar para o toast:
 String responseBody;
 try {
     responseBody = new ExampleWebService()
-        .postAccrual(cpfToSend, points, comments, protocolNumber);
+        .postRequest(documentToSend, payload, protocolNumber);
 } catch (AuraHandledException e) {
-    Logger.error('Falha no resgate. Protocolo ' + protocolNumber
+    Logger.error('Falha na solicitação. Protocolo ' + protocolNumber
             + ' | Caso ' + caseId + ': ' + e.getMessage(), e)
         .setRecordId(caseId)
         .addTag('<Modulo>').addTag('<Sistema>').addTag('Backoffice');
@@ -58,7 +60,7 @@ try {
     throw e;
 }
 // Sucesso (com vínculo):
-Logger.info('Resgate concluído. Protocolo ' + protocolNumber + ' | ID ' + requestId + ' ...')
+Logger.info('Solicitação concluída. Protocolo ' + protocolNumber + ' | ID ' + requestId + ' ...')
     .setRecordId(caseId).addTag(...); Logger.saveLog();
 ```
 
@@ -88,7 +90,7 @@ private static String maskDocument(String document) {
 - `Authorization`/`Cookie` manuais são **proibidos**: auth é 100% plataforma
   (Named/External Credential OAuth). Teste de contrato deve asserir ausência:
   `System.assertEquals(null, sent.getHeader('Authorization'))` e `...('Cookie')`.
-- A base pode logar `HttpRequestBody__c` **completo e em texto puro** (inclui CPF) —
+- A base pode logar `HttpRequestBody__c` **completo e em texto puro** (inclui dados pessoais) —
   ver item 5 (máscara declarativa, pendente).
 
 ### 3.5 Falha auxiliar nunca quebra sucesso principal
@@ -107,14 +109,14 @@ sucesso continua. Erro de negócio/infra da chamada principal segue via
 
 ## 5. Recomendações pendentes (não implementadas — decidir por capacidade)
 
-1. **Mascarar CPF no body logado pela base** via `LogEntryDataMaskRule__mdt`
+1. **Mascarar dados pessoais (ex.: documento do cliente) no body logado pela base** via `LogEntryDataMaskRule__mdt`
    (corpo hoje em texto puro — exposição LGPD).
 2. **Extrair `user_message`/`request_id` das respostas de erro** para toast e log
-   (ex.: 422 `CPF não cadastrado`), em vez de mensagem genérica.
+   (ex.: 422 `documento não cadastrado`), em vez de mensagem genérica.
 3. **Cenário de tags:** avaliar `setScenario()` por capacidade para agrupamento
    (hoje só tags livres).
 
-## 6. Troubleshooting rápido (sintomas vistos no piloto)
+## 6. Troubleshooting rápido (sintomas frequentes)
 
 | Sintoma | Causa provável | Onde confirmar |
 |---|---|---|
@@ -122,6 +124,6 @@ sucesso continua. Erro de negócio/infra da chamada principal segue via
 | Entrada de negócio sumida | criada após `saveLog()` sem novo `saveLog` | item 3.2 |
 | `StringException: Invalid id` | `setRecordId` com número de protocolo/ticket em vez de ID | item 3.3 |
 | 401 | token/EC; plataforma refresca sozinha — se persistir, checar principal/secret | corpo da resposta no log |
-| 422 rápido (~700ms) | **regra de negócio do parceiro** (ex.: CPF não cadastrado), não bug | `HttpResponseBody__c` → mensagem de negócio |
+| 422 rápido (~700ms) | **regra de negócio do parceiro** (ex.: documento não cadastrado), não bug | `HttpResponseBody__c` → mensagem de negócio |
 | 503 HTML / 504 / timeout 120s | gateway/infra HML instável ou fora do ar | demais fluxos com mesmo sintoma confirmam causa externa |
 | `LimitException` em Apex anônimo | `AuraHandledException` fora de contexto Aura | testar via UI/LWC ou blocos try/catch com debug |

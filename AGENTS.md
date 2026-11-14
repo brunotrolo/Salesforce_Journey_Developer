@@ -7,7 +7,7 @@ source of truth.
 ## What this repository is
 
 This repository **is a skill**, not a Salesforce project. What ships is the content of
-`.claude/` — 9 authored agents, 26 imported skills, 5 rules, hooks and settings — installed
+`.claude/` — the authored agents, the imported skills, 5 rules, hooks and settings — installed
 into someone else's SFDX project, alongside its sister skill
 [Salesforce Journey Designer](https://github.com/brunotrolo/Salesforce_Journey_Designer).
 
@@ -19,8 +19,8 @@ years.
 `force-app/` in this repo is the **layout skeleton** the agents write into, not a real
 project's code.
 
-This repo already delegates to subagents: `.claude/agents/` holds 9 authored agents (an
-orchestrator, 7 specialists and `sf-deploy-gate`), not a flat single-agent setup. Real
+This repo already delegates to subagents: `.claude/agents/` holds the authored agents (an
+orchestrator, the specialists and `sf-deploy-gate`), not a flat single-agent setup. Real
 deploys and test runs go through the `sf` CLI directly — deliberately, not via an MCP
 abstraction. Same reasoning as the deploy-guard pattern: a real-mutation command needs
 explicit, inspectable flags (`--target-org`, `--metadata <Type>:<Name>`, `--test-level`) that
@@ -60,7 +60,8 @@ optionally `model` and `memory`. That is **different** from a skill's `SKILL.md`
 `allowed-tools`. Don't "fix" one into the other — they are different mechanisms, and the
 wrong field is ignored in silence.
 
-Two agents declare `memory: project`, which auto-loads
+`sf-declarative-developer` and `sf-service-config-developer` declare `memory: project` (both work
+with no vendored skill behind them), which auto-loads
 `.claude/agent-memory/<agent-name>/MEMORY.md`. That exact path is the one the harness
 reads; a `MEMORY.md` anywhere else is dead weight.
 
@@ -86,7 +87,8 @@ explicitly.
 
 ### 6. Language convention
 Agent, rule and skill files default to **English**; `README.md` files are in **PT-BR**.
-PT-BR is permitted inside agents/skills for field-validated operational procedures where the
+PT-BR is permitted inside agents/skills for field-validated operational procedures (numbered
+recommendations are glossed in `.claude/skills/sf-build/references/recomendacoes.md`) where the
 team that proved them works in PT-BR — accuracy of a proven procedure outranks language
 uniformity. Talk to the user in PT-BR.
 
@@ -105,7 +107,7 @@ formula and the checklist but no project's product vocabulary. Keep both that wa
 
 ```
 .claude/
-├── agents/              # 9 authored agents (orchestrator + 7 specialists + deploy gate)
+├── agents/              # authored agents (orchestrator + specialists + deploy gate)
 ├── agent-memory/        # auto-loaded MEMORY.md per agent declaring memory: project
 ├── rules/
 │   ├── journey-developer.md    # always-on: structural project rules
@@ -125,7 +127,10 @@ force-app/               # layout skeleton the agents write into
 - [ ] Existing style matched; no drive-by edits to adjacent content
 - [ ] No imported/third-party skill rewritten
 - [ ] No real names reintroduced
-- [ ] README reflects structural changes (counts, rules table, phases)
+- [ ] README reflects structural changes (rules table, phases); the agent-count badge is
+      checked by `scripts/verify-skills.mjs`, other counts are not typed in prose
+- [ ] `node scripts/verify-skills.mjs`, `node scripts/verify-scope.mjs` and
+      `node --test .claude/hooks/tests/*.test.mjs` pass
 
 ## Alignment with the agentic framework
 

@@ -11,7 +11,7 @@
 // Split a shell line into per-segment strings and drop `#` comments, so a flag
 // in one segment (or in a comment) can never authorize a different segment.
 // The approval env var only counts when it prefixes the same segment:
-// `SF_HEAVY_TESTS_APPROVED=1 sf ...` (allowed) vs `... && echo FSC_...` (blocked).
+// `SF_HEAVY_TESTS_APPROVED=1 sf ...` (allowed) vs `... && echo SF_...` (blocked).
 function sfSegments(command) {
   return String(command)
     .split(/&&|\|\||[|;&]/)
@@ -114,7 +114,7 @@ const RULES = [
     // O gate de finalizacao (--test-level RunLocalTests, ver regra acima que
     // exige SF_HEAVY_TESTS_APPROVED=1 sem NoTestRun) continua livre para usar
     // --source-dir/--manifest: ali a closure de dependencias e proposital
-    // (sf-deploy-gate.md, Rec 4) -- um caso diferente deste.
+    // (sf-deploy-gate.md, closure de dependencias) -- um caso diferente deste.
     test: (c) =>
       sfSegments(c).some(
         (s) =>

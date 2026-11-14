@@ -1,6 +1,6 @@
 ---
 name: sf-build
-description: Build and deploy one already-designed FSC capability, end to end, through sf-build-orchestrator (fast NoTestRun sandbox iterations by default; full deploy gate only on explicit user-requested finalization).
+description: Build and deploy one already-designed Service Cloud capability, end to end, through sf-build-orchestrator (fast NoTestRun sandbox iterations by default; full deploy gate only on explicit user-requested finalization).
 argument-hint: <domain> <capability>
 arguments: [domain, capability]
 disable-model-invocation: true
@@ -16,15 +16,15 @@ do not re-derive it here, and do not build anything yourself in the main context
 ## Dois modos: desenvolvimento rápido vs finalização
 
 - **Desenvolvimento em sandbox (padrão, máxima performance):** ajustes e validação via
-  deploy rápido `sf project deploy start --target-org "$SF_TARGET_ORG" --source-dir <path>
+  deploy rápido `sf project deploy start --target-org "$SF_TARGET_ORG" --metadata <Tipo>:<Nome>
   --test-level NoTestRun` — sem testes, sem cobertura, sem scans e **sem** atualizar
   documentações de referência. Este modo **não** invoca `sf-deploy-gate`.
 - **Finalização/homologação (somente sob pedido explícito do usuário):** com
   `SF_FINALIZE_DOCS=1` para documentações de referência e
   `SF_HEAVY_TESTS_APPROVED=1` para testes/cobertura/scans, aí sim roda o
   `sf-build-orchestrator` + `sf-deploy-gate` completos.
-- **Delta no fast-path:** deployar só os arquivos tocados (`--source-dir` estreito por
-  arquivo/pasta, ou `--manifest` mínimo com a closure de dependências) — nunca a pasta
+- **Delta no fast-path:** deployar só os componentes tocados (`--metadata Tipo:Nome[,Tipo:Nome]`;
+  nunca `--source-dir` com `NoTestRun` — o hook `guard-deploy.mjs` nega) — nunca a pasta
   do domínio inteira. Menos zip, menos tempo, zero re-deploy acidental.
 - **Teste nasce junto, executa depois:** toda classe nova já vem com sua `*Test.cls`
   (ou `*_tst.cls`) e asserts na mesma iteração; a execução fica para a finalização.
@@ -33,7 +33,8 @@ do not re-derive it here, and do not build anything yourself in the main context
   contrato/credencial cedo; a evidência formal é só na finalização.
 - **Antes de pedir a finalização**, rode o check de 30s:
   `node .claude/skills/sf-build/scripts/pre-finalizacao-check.mjs --root <metadata-root>
-  --manifest manifest/package-<capacidade>.xml --backlog docs/sdd/BACKLOG.md --slug <NNN-slug>`.
+  --manifest manifest/package-<capacidade>.xml --backlog docs/sdd/BACKLOG.md
+  --domain <dominio> --slug <NNN-slug>`.
 
 Before dispatching, resolve what the user actually named:
 
@@ -57,7 +58,11 @@ quando o usuário pediu explicitamente o gate completo.
 
 ## References (this skill's own, read by its agents — not imports)
 
-- `references/nebula-logger-boas-praticas.md` — mandatory logging discipline for every
+- `references/dispatch-protocol.md` — dispatch envelope, metadata ownership table, group
+  order, report contract, manifest rule. Read by `sf-build-orchestrator`.
+- `references/recomendacoes.md` — glossary of the numbered recommendations ("Rec N") cited by agents.
+- `references/nebula-logger-boas-praticas.md` — logging discipline for projects that use the
+  Nebula Logger framework (not part of a standard Service Cloud org), for every
   capability with integration (runbook, severity levels, log-then-save + `RecordId__c` pattern,
   definition of done). Read by `sf-integration-developer` and `sf-apex-developer`.
 - `references/permissionamento-v2.md` — internal naming pattern for every permission set /
@@ -70,8 +75,8 @@ quando o usuário pediu explicitamente o gate completo.
 Somente quando o usuário pedir explicitamente a finalização (`SF_FINALIZE_DOCS=1`),
 toda capacidade com integração externa shipa uma seção em
 `docs/passos-manuais-deploy.md` (one section per capability, from the template above):
-pre-deploy manual steps (infra, credentials, Lookup Table/Decision Matrix rows, business
-pendencies), deploy order, and post-deploy validation. `sf-integration-developer` writes it;
+pre-deploy manual steps (infra, credentials, network allowlist, Setup-only configuration,
+business pendencies), deploy order, and post-deploy validation. `sf-integration-developer` writes it;
 nesse modo, `sf-deploy-gate` reads it before declaring built and fails the gate if the
 section is missing or incomplete. Durante o desenvolvimento rápido em sandbox, este
 arquivo **não** é criado nem atualizado — foco total nos artefatos da org.

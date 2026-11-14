@@ -1,11 +1,11 @@
 ---
-paths: force-app/**/objects/**, force-app/**/permissionsets/**, force-app/**/flexipages/**, force-app/**/flows/**, force-app/**/namedCredentials/**, force-app/**/externalCredentials/**, force-app/**/platformEvents/**, force-app/**/omniStudio/**
+paths: force-app/**/objects/**, force-app/**/permissionsets/**, force-app/**/flexipages/**, force-app/**/flows/**, force-app/**/namedCredentials/**, force-app/**/externalCredentials/**, force-app/**/platformEvents/**, force-app/**/queues/**, force-app/**/assignmentRules/**, force-app/**/escalationRules/**, force-app/**/entitlementProcesses/**, force-app/**/applications/**, force-app/**/quickActions/**, force-app/**/layouts/**, force-app/**/settings/**
 ---
 
 # Declarative and configuration metadata
 
 Full authoring guidance lives in `sf-data-model-developer`, `sf-integration-developer`,
-`sf-declarative-developer` and `sf-automation-developer` — this file is only what must
+`sf-declarative-developer`, `sf-automation-developer` and `sf-service-config-developer` — this file is only what must
 hold for any metadata file touched here.
 
 - **SFDX source format shapes the path.** A custom field is its own file at
@@ -24,6 +24,10 @@ hold for any metadata file touched here.
 - **Flow deploys as Draft and is never activated blind.** Activate only after the gate
   validates it and, for anything record-triggered or scheduled, after the business confirms
   the behavior. Every element that can fail (DML, callout, get-records) needs a fault path.
-- `omniStudio/*.json` is a version-controlled copy of an authored FlexCard/OmniScript config
-  for review in a PR. It is **not** a deployable SFDX artifact — the real artifacts are
-  `OmniUiCard`/`OmniProcess` sObject records.
+- **One active Assignment Rule per object.** Deploying a second active rule silently
+  replaces the first; confirm with the user before activating, and let the gate verify the
+  final active state.
+- **Entitlement Process versions are immutable once in use.** A change is a new version,
+  not an edit, and activating it changes live SLA behavior — flag it for confirmation.
+- **Queues must exist before anything references them** (assignment rules, routing
+  configurations, Flow assignment) — author and deploy them first.

@@ -25,7 +25,7 @@ nomear sem erro.
    nunca inventado na hora. Se o vocabulário ainda não existe, **pare e pergunte ao usuário**:
    nome de produto errado num Permission Set é retrabalho em cascata.
 3. **O que faz? (Operação, em EN)** — o verbo/substantivo da operação, em PascalCase:
-   `InvoiceCancellation`, `BalanceQuery`, `IdentityValidation`, `CreditApproval`, `Purchase`.
+   `CaseReopen`, `EntitlementOverride`, `IdentityValidation`, `RefundApproval`, `KnowledgePublish`.
 4. **Especificidade? (opcional)** — subgrupo restrito dentro da função (um time ou papel
    específico, no vocabulário do projeto). Omitir quando a permissão vale para qualquer
    operador da função.
@@ -36,11 +36,11 @@ nomear sem erro.
 `<Produto>` representa o token do produto do projeto — substitua pelo vocabulário real.
 
 ```
-PS_<Produto>_InvoiceCancellation_Edit
-PS_<Produto>_InvoiceCancellation_View
+PS_<Produto>_CaseReopen_Edit
+PS_<Produto>_CaseReopen_View
 PS_<Produto>_Admin
 PS_Cross_IdentityValidation_View
-PS_Cross_CreditApproval_<Time>_Edit
+PS_Cross_RefundApproval_<Time>_Edit
 PSG_<Produto>_Sales_FullAccess
 CP_Cross_<Recurso>_View
 CP_<Produto>_Admin

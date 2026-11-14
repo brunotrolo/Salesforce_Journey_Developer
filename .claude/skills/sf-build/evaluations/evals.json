@@ -1,0 +1,75 @@
+{
+  "skill": "sf-build",
+  "description": "Behavioral scenarios for the build pipeline. Run each prompt in a fresh session against a project with the Designer installed, then check every item of `expect` (see README.md in this folder).",
+  "scenarios": [
+    {
+      "id": "refuses-not-ready",
+      "setup": "BACKLOG.md lists atendimento/001 with status 'spec'.",
+      "prompt": "/sf-build atendimento 001",
+      "expect": [
+        "stops before writing anything under force-app/",
+        "points the user back to the Designer skill",
+        "does not dispatch any specialist"
+      ]
+    },
+    {
+      "id": "fast-deploy-uses-metadata",
+      "setup": "SF_TARGET_ORG is set; a new Apex class and its test were just written.",
+      "prompt": "Deploy the new class to the sandbox quickly.",
+      "expect": [
+        "uses `sf project deploy start --target-org \"$SF_TARGET_ORG\" --metadata ApexClass:<Name> --test-level NoTestRun`",
+        "never uses --source-dir together with NoTestRun",
+        "does not invoke sf-deploy-gate"
+      ]
+    },
+    {
+      "id": "routes-per-step",
+      "setup": "plan.md has 3 steps: Highlights Panel (padrão), intake Screen Flow, one custom LWC; classification 'misto'.",
+      "prompt": "Build atendimento 002.",
+      "expect": [
+        "routes the Highlights Panel to sf-declarative-developer, the Screen Flow to sf-automation-developer, the LWC to sf-lwc-developer (+ sf-apex-developer for its backend)",
+        "dispatches in order: data-model/integration, then apex/service-config, then lwc/automation, then declarative",
+        "each dispatch carries the single envelope with change-class"
+      ]
+    },
+    {
+      "id": "service-config-ownership",
+      "setup": "tasks.md includes a support queue, an assignment rule and a 4-hour first-response milestone.",
+      "prompt": "Build _fundacao 001.",
+      "expect": [
+        "routes queue, assignment rule and Entitlement/Milestone to sf-service-config-developer",
+        "no other specialist authors those types",
+        "service-config checks the Metadata API documentation for each type, and records any non-deployable type as a manual step"
+      ]
+    },
+    {
+      "id": "no-out-of-scope-artifacts",
+      "setup": "A capability's plan mentions a guided customer lookup form.",
+      "prompt": "Build it.",
+      "expect": [
+        "proposes Screen Flow / Dynamic Forms / LWC only",
+        "proposes no FlexCard, OmniScript, DataRaptor, Integration Procedure or any industry-cloud object"
+      ]
+    },
+    {
+      "id": "org-fail-closed",
+      "setup": "SF_TARGET_ORG is not set.",
+      "prompt": "Deploy ApexClass:Foo to the sandbox.",
+      "expect": [
+        "the guard hook denies the deploy",
+        "the agent tells the user to set SF_TARGET_ORG instead of picking an org alias itself"
+      ]
+    },
+    {
+      "id": "gate-needs-evidence",
+      "setup": "User asks for finalization with SF_HEAVY_TESTS_APPROVED=1.",
+      "prompt": "Finalize atendimento 002.",
+      "expect": [
+        "runs pre-finalizacao-check.mjs first",
+        "sf-deploy-gate reports each phase with CHECK/EXPECT evidence or an explicit ABANDON",
+        "service-config artifacts are verified by a read-only query of their active state",
+        "BACKLOG is marked built only after the gate passes, citing the deploy job id"
+      ]
+    }
+  ]
+}

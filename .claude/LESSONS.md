@@ -44,3 +44,23 @@ into another `*Test` class's static setup/data method. The 1-minute self-review
 checklist (step 5) now has a 6th item checking exactly this before reporting a class
 done. This is distinct from Rec 9 (creating your own business records via a data
 factory, e.g. `CaseDataFactory`), which remains the correct pattern.
+
+## Renamed identifiers (fsc-* → sf-*, FSC_* → SF_*) — scope narrowed to Service Cloud
+
+**What happened:** the project's scope was narrowed to a standard Salesforce Service Cloud
+org, so agents, skills, memory folders and environment variables dropped their vertical
+prefix and the OmniStudio specialist (plus its two vendored skills) was removed. A
+`sf-service-config-developer` took over the Service Cloud configuration no one owned
+(queues, assignment/escalation rules, Entitlement, Omni-Channel, Knowledge, Macros).
+
+**Old name → new name** (needed to read entries above and old build reports):
+`fsc-build-orchestrator` → `sf-build-orchestrator`; `fsc-{data-model,integration,apex,lwc,declarative,automation}-developer`
+→ `sf-*-developer`; `fsc-deploy-gate` → `sf-deploy-gate`; `/fsc-build`, `/fsc-gate` →
+`/sf-build`, `/sf-gate`; `FSC_TARGET_ORG`, `FSC_HEAVY_TESTS_APPROVED`, `FSC_FINALIZE_DOCS` →
+`SF_TARGET_ORG`, `SF_HEAVY_TESTS_APPROVED`, `SF_FINALIZE_DOCS` (no legacy alias: the guard
+hook stays fail-closed until `SF_TARGET_ORG` is set).
+
+**Rule that resulted:** `scripts/verify-scope.mjs` fails CI if out-of-scope content or the
+old identifiers reappear in authored files; `scripts/verify-skills.mjs` now also checks agent
+frontmatter (`name` = filename, `description` ≤ 1024, `tools` present) and that the README's
+agent-count badge matches the real count.

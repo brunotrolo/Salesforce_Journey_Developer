@@ -3,7 +3,7 @@
 O Salesforce Journey Developer é distribuído sob licença MIT (ver `LICENSE`) e redistribui
 material de terceiros sob as licenças originais.
 
-O conteúdo **autoral** deste repositório são os 9 agentes em `.claude/agents/`, as rules em
+O conteúdo **autoral** deste repositório são os agentes em `.claude/agents/`, as rules em
 `.claude/rules/` (exceto `karpathy-guidelines.md`, derivada — ver abaixo) e as skills
 `sf-build/` e `sf-gate/`. Todo o resto sob `.claude/skills/` é importado.
 

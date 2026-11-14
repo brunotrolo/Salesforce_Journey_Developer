@@ -51,14 +51,14 @@ Before implementing:
 
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
-> **In this project.** Over-customization is the reason this migration exists — the
+> **In this project.** Over-customization is the most common reason an org becomes hard to sustain — the
 > `Standard-first` rule is this guideline wearing a Salesforce hat. Rule out a standard
 > object, a standard field, a Compact Layout or a Record-Triggered Flow before building a
 > custom one. Concretely: no custom object when a standard one plus a field works; no Apex
 > when a Flow does the job; no service/selector layering invented for a single capability;
 > no `@AuraEnabled` method "for future use"; no Custom Metadata Type to configure something
 > that has exactly one value. Every custom artifact you create is one more thing the next
-> migration has to justify.
+> maintainer has to justify.
 
 ---
 
