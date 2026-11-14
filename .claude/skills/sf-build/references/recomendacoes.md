@@ -23,4 +23,4 @@ aplica. A regra completa fica no agente dono — aqui só o suficiente para ente
 | 21 | Trilha de auditoria append-only em campo `Text(500)` com truncagem | `sf-apex-developer` |
 | 22 | Identificador do operador via `User.FederationIdentifier`, fallback `User.Id` | `sf-apex-developer` |
 | 24 | Pré-requisito `docs/passos-manuais-deploy.md` completo antes de finalizar | `sf-deploy-gate` |
-| 25 | Classe de teste autocontida: sem SOQL por nome a RecordType/Profile/PermissionSet/Queue/Group/UserRole/BusinessHours; sem depender de outra classe `*Test` | `sf-apex-developer` |
+| 25 | Classe de teste autocontida: sem SOQL por nome a RecordType/Profile/PermissionSet/Queue/Group/UserRole/BusinessHours; sem depender de outra classe `*Test` (reforçada pelo hook `guard-test-content.mjs`) | `sf-apex-developer` |

@@ -142,6 +142,8 @@ Permissões cobrem o óbvio (`sf org delete`, `sf data delete`, `rm -rf`, `git p
 
 Comandos de mutação real (`sf project deploy start` sem `--dry-run`, `sf data create record`, `sf org assign permset`) disparam prompt de permissão — são checkpoints humanos na mutação do org, não falhas. Leitura, dry-run, scans e testes são pré-aprovados.
 
+Um segundo hook, `.claude/hooks/guard-test-content.mjs` (`Write|Edit`), pede confirmação quando uma classe de teste Apex (`*Test.cls`/`*_tst.cls`) consulta por `Name`/`DeveloperName` um objeto de configuração da org (RecordType, Profile, Queue…) ou chama método estático de outra classe de teste — testes precisam ser autocontidos para não quebrar o deploy em outro ambiente.
+
 Está em Node porque Node ≥20 já é pré-requisito e se comporta igual no Windows, Mac e Linux — um hook `.sh` não. Se o payload vier quebrado, ele sai em silêncio sem bloquear: um bug no guard nunca pode travar trabalho legítimo.
 
 ## Como o orquestrador funciona internamente
