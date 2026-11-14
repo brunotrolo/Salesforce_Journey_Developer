@@ -13,7 +13,7 @@ Source of record: verified configurations from real org builds.
 ## 2. Financial Accounts Related Lists
 
 - Related Lists need the Financial Accounts object model fields to exist before
-  configuration. Cross-check with `fsc-data-model-developer`'s output.
+  configuration. Cross-check with `sf-data-model-developer`'s output.
 
 ## 3. Highlights Panel field order
 

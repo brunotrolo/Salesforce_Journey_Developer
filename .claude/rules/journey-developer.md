@@ -16,7 +16,7 @@ rules are always true here, whichever agent is running.
 
 ## Nothing is "built" without evidence
 
-`fsc-deploy-gate` is the only authority on whether a capability is deployed. A capability
+`sf-deploy-gate` is the only authority on whether a capability is deployed. A capability
 is done when the gate cites the command, its exit code, and the field from its JSON output
 that proves the outcome — deploy job id, test run id, coverage %, scan severity counts.
 "The code looks right" and "the deploy command didn't error" are not evidence. A gate that
@@ -45,15 +45,15 @@ of deploy-guard corrections, and a past correction there is not to be relearned 
 
 Whenever asked to deploy one or more artifacts in the fast sandbox cycle (not the
 finalization gate), the command is always `sf project deploy start --target-org
-"$FSC_TARGET_ORG" --metadata <Type>:<Name> --test-level NoTestRun` — comma-separate
+"$SF_TARGET_ORG" --metadata <Type>:<Name> --test-level NoTestRun` — comma-separate
 multiple artifacts in one call (`--metadata ApexClass:Foo,LightningComponentBundle:bar`),
-never `--source-dir`. Example: `sf project deploy start --target-org "$FSC_TARGET_ORG"
+never `--source-dir`. Example: `sf project deploy start --target-org "$SF_TARGET_ORG"
 --metadata ApexClass:LogEntryEventBuilder --test-level NoTestRun`.
 `guard-deploy.mjs` enforces this mechanically (denies `--source-dir` combined with
-`--test-level NoTestRun`). This does not apply to `fsc-deploy-gate`'s finalization phases,
+`--test-level NoTestRun`). This does not apply to `sf-deploy-gate`'s finalization phases,
 which deliberately use `--source-dir`/`--manifest` for full dependency-closure deploys
 (see that agent's Rec 4) — a different concern from an ad-hoc sandbox push.
-**Org-existente exception:** when `fsc-build-orchestrator` registered org-existente mode for
+**Org-existente exception:** when `sf-build-orchestrator` registered org-existente mode for
 the project (existing flat layout, e.g. `force-app/main/default/`), every specialist writes
 under that existing layout instead of `force-app/domains/<domain>/` — the domain-boundary
 rule still holds logically (never touch another domain's artifacts), only the physical root

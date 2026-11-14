@@ -11,7 +11,7 @@
 // Split a shell line into per-segment strings and drop `#` comments, so a flag
 // in one segment (or in a comment) can never authorize a different segment.
 // The approval env var only counts when it prefixes the same segment:
-// `FSC_HEAVY_TESTS_APPROVED=1 sf ...` (allowed) vs `... && echo FSC_...` (blocked).
+// `SF_HEAVY_TESTS_APPROVED=1 sf ...` (allowed) vs `... && echo FSC_...` (blocked).
 function sfSegments(command) {
   return String(command)
     .split(/&&|\|\||[|;&]/)
@@ -22,10 +22,10 @@ function sfSegments(command) {
 const ORG_FLAG = /(?:^|\s)(?:--target-org|-o)(=|\s)/;
 
 // The one org alias this project may deploy to, configured per-project via the
-// FSC_TARGET_ORG env var. No alias is hardcoded here on purpose: a clone of this repo
+// SF_TARGET_ORG env var. No alias is hardcoded here on purpose: a clone of this repo
 // must not inherit someone else's org, and an unset var stays fail-closed (every
 // deploy/test is blocked until it is set).
-const TARGET_ORG = String(process.env.FSC_TARGET_ORG || '').trim();
+const TARGET_ORG = String(process.env.SF_TARGET_ORG || '').trim();
 const escapeRe = (v) => v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const ORG_TARGET = TARGET_ORG
   ? new RegExp(
@@ -35,10 +35,10 @@ const ORG_TARGET = TARGET_ORG
 const isTargetOrg = (s) => (ORG_TARGET ? ORG_TARGET.test(s) : false);
 
 const UNSET_REASON =
-  'FSC_TARGET_ORG nao esta definida, entao nenhuma org esta autorizada para deploy/teste. ' +
-  'Defina-a com o alias da sandbox deste projeto (ex.: export FSC_TARGET_ORG=minha-sandbox) antes de deployar.';
+  'SF_TARGET_ORG nao esta definida, entao nenhuma org esta autorizada para deploy/teste. ' +
+  'Defina-a com o alias da sandbox deste projeto (ex.: export SF_TARGET_ORG=minha-sandbox) antes de deployar.';
 const NO_TEST_RUN = /--test-level[= ]\s*["']?NoTestRun["']?/i;
-const APPROVED = /FSC_HEAVY_TESTS_APPROVED=1/;
+const APPROVED = /SF_HEAVY_TESTS_APPROVED=1/;
 const DEPLOY_START = /\bproject\s+deploy\s+start\b/i;
 const APEX_TEST = /\bapex\s+run\s+test\b/i;
 
@@ -64,7 +64,7 @@ const RULES = [
           !isTargetOrg(s)
       ),
     reason: TARGET_ORG
-      ? `Only the sandbox org alias "${TARGET_ORG}" (FSC_TARGET_ORG) is allowed for deploys/test runs; specify --target-org ${TARGET_ORG}.`
+      ? `Only the sandbox org alias "${TARGET_ORG}" (SF_TARGET_ORG) is allowed for deploys/test runs; specify --target-org ${TARGET_ORG}.`
       : UNSET_REASON,
   },
   {
@@ -73,7 +73,7 @@ const RULES = [
         (s) => DEPLOY_START.test(s) && /--ignore-errors|--ignore-warnings/.test(s)
       ),
     reason:
-      'Deploy parcial com --ignore-errors/--ignore-warnings esconde falhas e contradiz o portao de evidencia (fsc-deploy-gate). Rode o deploy sem essas flags e trate a falha real.',
+      'Deploy parcial com --ignore-errors/--ignore-warnings esconde falhas e contradiz o portao de evidencia (sf-deploy-gate). Rode o deploy sem essas flags e trate a falha real.',
   },
   {
     test: (c) =>
@@ -81,13 +81,13 @@ const RULES = [
         (s) => DEPLOY_START.test(s) && !NO_TEST_RUN.test(s) && !APPROVED.test(s)
       ),
     reason:
-      'Deploy with tests is heavy (including --dry-run validates); only run after explicit approval. Prefix the command with FSC_HEAVY_TESTS_APPROVED=1.',
+      'Deploy with tests is heavy (including --dry-run validates); only run after explicit approval. Prefix the command with SF_HEAVY_TESTS_APPROVED=1.',
   },
   {
     test: (c) =>
       sfSegments(c).some((s) => APEX_TEST.test(s) && !APPROVED.test(s)),
     reason:
-      'Apex test run is heavy; only run after explicit approval. Prefix the command with FSC_HEAVY_TESTS_APPROVED=1.',
+      'Apex test run is heavy; only run after explicit approval. Prefix the command with SF_HEAVY_TESTS_APPROVED=1.',
   },
   {
     test: (c) =>
@@ -95,7 +95,7 @@ const RULES = [
         (s) => /\bcode-analyzer\b/i.test(s) && !/--help/.test(s) && !APPROVED.test(s)
       ),
     reason:
-      'Static scan is heavy; only run after explicit approval. Prefix the command with FSC_HEAVY_TESTS_APPROVED=1.',
+      'Static scan is heavy; only run after explicit approval. Prefix the command with SF_HEAVY_TESTS_APPROVED=1.',
   },
   {
     test: (c) =>
@@ -112,9 +112,9 @@ const RULES = [
     // artefato por artefato via --metadata <Tipo>:<Nome> -- nunca --source-dir,
     // que aqui reintroduziria a imprecisao que --metadata existe para evitar.
     // O gate de finalizacao (--test-level RunLocalTests, ver regra acima que
-    // exige FSC_HEAVY_TESTS_APPROVED=1 sem NoTestRun) continua livre para usar
+    // exige SF_HEAVY_TESTS_APPROVED=1 sem NoTestRun) continua livre para usar
     // --source-dir/--manifest: ali a closure de dependencias e proposital
-    // (fsc-deploy-gate.md, Rec 4) -- um caso diferente deste.
+    // (sf-deploy-gate.md, Rec 4) -- um caso diferente deste.
     test: (c) =>
       sfSegments(c).some(
         (s) =>

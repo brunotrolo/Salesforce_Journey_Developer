@@ -20,30 +20,30 @@ Constrói e deploya de verdade o que a skill irmã **[Salesforce Journey Designe
 **Como funciona** — mesma separação de papéis que a skill irmã Designer usa, adaptada para build/deploy:
 - **Orquestração e decisão** (a sequência, o que é gap real vs. o que é ambiguidade a devolver ao Designer, o portão de evidência) → nossos **9 agentes autorais** em `.claude/agents/`. É aqui que mora o conhecimento do projeto; nada disto é importado.
 - **Craft técnico** (sintaxe de campo, template de Named Credential, comando exato de deploy/teste/scan) → as **26 skills importadas** em `.claude/skills/`, curadas de 3 repositórios open-source (ver `.claude/skills/README.md`). Um agente **consulta** uma skill por caminho quando precisa — a skill nunca decide nada sozinha, e por isso nenhuma delas aparece como comando `/`.
-- Duas exceções conhecidas a essa regra, documentadas nos próprios agentes: `fsc-build-orchestrator` não executa skill técnica nenhuma — é puro sequenciamento (só espelha a ordem de deploy de `platform-metadata-deploy`); `fsc-declarative-developer` não tem skill importada para Account Relationship Chart/Financial Accounts/Life Events (nenhum catálogo cobre a vertical FSC) — resolve com conhecimento de plataforma e memória de projeto (`memory: project`).
+- Duas exceções conhecidas a essa regra, documentadas nos próprios agentes: `sf-build-orchestrator` não executa skill técnica nenhuma — é puro sequenciamento (só espelha a ordem de deploy de `platform-metadata-deploy`); `sf-declarative-developer` não tem skill importada para Account Relationship Chart/Financial Accounts/Life Events (nenhum catálogo cobre a vertical FSC) — resolve com conhecimento de plataforma e memória de projeto (`memory: project`).
 
 ## Os 9 agentes
 
 | Agente | Papel |
 |---|---|
-| `fsc-build-orchestrator` | Ponto de entrada — lê 100% da pasta da capacidade, despacha especialistas com envelope estruturado `{capability-path, metadata-root, relevant-tasks, metadata-type}`, sequencia na ordem de dependência, nunca declara "construído" sem o gate passar. |
-| `fsc-data-model-developer` | Objetos/campos/RecordTypes/permission sets reais — **único autor de PS/PSG/CP** (padrão de nomenclatura). |
-| `fsc-integration-developer` | Named Credentials/External Credentials/Platform Events — plumbing de integração que todo callout/evento cross-domain depende de existir antes. |
-| `fsc-apex-developer` | Apex de produção + teste — nunca um sem o outro, incluindo callouts com `HttpCalloutMock`. Padrões de teste do piloto (Recs 5–13, 16, 21, 22) inlineados. |
-| `fsc-lwc-developer` | LWC de produção com dados reais e Lightning Message Service (a contraparte do protótipo do Designer). |
+| `sf-build-orchestrator` | Ponto de entrada — lê 100% da pasta da capacidade, despacha especialistas com envelope estruturado `{capability-path, metadata-root, relevant-tasks, metadata-type}`, sequencia na ordem de dependência, nunca declara "construído" sem o gate passar. |
+| `sf-data-model-developer` | Objetos/campos/RecordTypes/permission sets reais — **único autor de PS/PSG/CP** (padrão de nomenclatura). |
+| `sf-integration-developer` | Named Credentials/External Credentials/Platform Events — plumbing de integração que todo callout/evento cross-domain depende de existir antes. |
+| `sf-apex-developer` | Apex de produção + teste — nunca um sem o outro, incluindo callouts com `HttpCalloutMock`. Padrões de teste do piloto (Recs 5–13, 16, 21, 22) inlineados. |
+| `sf-lwc-developer` | LWC de produção com dados reais e Lightning Message Service (a contraparte do protótipo do Designer). |
 | `fsc-omnistudio-developer` | FlexCard/OmniScript reais (mesmo escopo do Designer: só estes dois — via registro de sObject, não arquivo de metadado clássico). Contrato Apex Remote confirmado e documentado. |
-| `fsc-declarative-developer` | Compact Layout/Highlights/Related Lists/Account Relationship Chart + montagem da Lightning Record Page — a fatia 100% declarativa de toda capacidade FSC real. Memória de projeto para configurações FSC sem skill. |
-| `fsc-automation-developer` | Flow real — a lacuna que o Designer deixa aberta de propósito. |
-| `fsc-deploy-gate` | Portão de evidência: scan estático → deploy validado → deploy real → teste Apex com cobertura → checagem de LWC → verificação de acesso. Relatório de falha estruturado `{phase, owning-agent, error-evidence}`. Disciplina `CHECK:`/`EXPECT:`/`ABANDON:` inlineada. |
+| `sf-declarative-developer` | Compact Layout/Highlights/Related Lists/Account Relationship Chart + montagem da Lightning Record Page — a fatia 100% declarativa de toda capacidade FSC real. Memória de projeto para configurações FSC sem skill. |
+| `sf-automation-developer` | Flow real — a lacuna que o Designer deixa aberta de propósito. |
+| `sf-deploy-gate` | Portão de evidência: scan estático → deploy validado → deploy real → teste Apex com cobertura → checagem de LWC → verificação de acesso. Relatório de falha estruturado `{phase, owning-agent, error-evidence}`. Disciplina `CHECK:`/`EXPECT:`/`ABANDON:` inlineada. |
 
 Detalhes de cada um em [`.claude/agents/README.md`](.claude/agents/README.md). Origem e justificativa de cada skill importada em [`.claude/skills/README.md`](.claude/skills/README.md).
 
 ## Pré-requisitos
 
-- **Salesforce CLI (`sf`) v2** instalado, e uma **org autenticada** (sandbox, scratch org, ou dev org) — `sf --version` e `sf org display --target-org <alias>` precisam funcionar antes de rodar `fsc-deploy-gate`. Sem isso, o gate para e diz exatamente isso — nunca simula um deploy.
-- **`@salesforce/plugin-code-analyzer` (v5.x+)** — `sf plugins install code-analyzer`. Sem ele, `sf code-analyzer run` não existe e `dx-code-analyzer-run` (usado por `fsc-apex-developer` e `fsc-deploy-gate`) não tem como rodar.
+- **Salesforce CLI (`sf`) v2** instalado, e uma **org autenticada** (sandbox, scratch org, ou dev org) — `sf --version` e `sf org display --target-org <alias>` precisam funcionar antes de rodar `sf-deploy-gate`. Sem isso, o gate para e diz exatamente isso — nunca simula um deploy.
+- **`@salesforce/plugin-code-analyzer` (v5.x+)** — `sf plugins install code-analyzer`. Sem ele, `sf code-analyzer run` não existe e `dx-code-analyzer-run` (usado por `sf-apex-developer` e `sf-deploy-gate`) não tem como rodar.
 - **Java 11+** — motores PMD/CPD/SFGE do code analyzer dependem dele; sem Java, o scanner falha ao iniciar esses motores (mas ainda roda ESLint/RetireJS via Node).
-- **Node.js ≥ 20** — Jest do `fsc-lwc-developer` (o mesmo Node que o Designer já exige para o kit de protótipo) e os motores ESLint/RetireJS do code analyzer.
+- **Node.js ≥ 20** — Jest do `sf-lwc-developer` (o mesmo Node que o Designer já exige para o kit de protótipo) e os motores ESLint/RetireJS do code analyzer.
 - **Python ≥ 3.10** e **`jq` ≥ 1.6** — dependências reais (não opcionais) de várias skills oficiais: `platform-apex-test-run`, `platform-soql-query`, `experience-lwc-security-validate`, `experience-accessibility-validate` e o motor Flow do code analyzer as usam para parsing/análise, não é um "nice to have".
 - O projeto já ter o **Salesforce Journey Designer** instalado, com pelo menos uma capacidade em status "pronto para build" em `docs/sdd/BACKLOG.md` (spec + design + protótipo + plano técnico já validados).
 
@@ -51,7 +51,7 @@ Detalhes de cada um em [`.claude/agents/README.md`](.claude/agents/README.md). O
 
 ### O que o Designer entrega a você
 
-Antes de rodar `/fsc-build`, verifique que a capacidade em `docs/sdd/BACKLOG.md` tem
+Antes de rodar `/sf-build`, verifique que a capacidade em `docs/sdd/BACKLOG.md` tem
 status **"pronto para build"** — isso significa que `spec.md`, `plan.md`, `tasks.md`,
 `architecture.md` e `prototype/` existem e estão validados com o negócio. A pasta
 `specs/<domínio>/<NNN>-<slug>/` deve conter esses arquivos; `tasks.md` é a lista de
@@ -76,15 +76,15 @@ git clone --depth 1 https://github.com/brunotrolo/Salesforce_Journey_Developer.g
 
 `-Force`/`cp -r` em `.claude/` é intencional: agentes, skills e rules daqui são um superconjunto dos do Designer — sobrescrever é um no-op para o que já existe e adiciona o resto. **Exceção: `settings.json`.** Se você já tinha um, ele é preservado como `.claude/settings.json.anterior` — permissões e hooks são configuração sua, não nossa; abra os dois e junte o que fizer sentido. `force-app/`, `sfdx-project.json` e `.forceignore` só são copiados se ainda não existirem (não sobrescreve um projeto SFDX que você já tenha).
 
-### Configuração obrigatória: `FSC_TARGET_ORG`
+### Configuração obrigatória: `SF_TARGET_ORG`
 
 Antes de qualquer deploy, defina o alias da **sandbox** deste projeto:
 
 ```bash
-export FSC_TARGET_ORG=minha-sandbox        # Mac / Linux / Git Bash
+export SF_TARGET_ORG=minha-sandbox        # Mac / Linux / Git Bash
 ```
 ```powershell
-$env:FSC_TARGET_ORG = "minha-sandbox"      # Windows (PowerShell)
+$env:SF_TARGET_ORG = "minha-sandbox"      # Windows (PowerShell)
 ```
 
 Nenhum alias vem embutido no repositório, de propósito: um clone não pode herdar a org de
@@ -101,30 +101,30 @@ Depois, abra o Claude Code na pasta do projeto — os 9 agentes, as rules e os c
 |---|---|---|
 | `agents/` | Os 9 subagentes. Cada um roda na própria janela de contexto. | Quando despachados |
 | `rules/` | `journey-developer.md` (regras estruturais sempre válidas + contract de report dos especialistas) e `karpathy-guidelines.md` (disciplina comportamental: pense antes de codar, simplicidade, mudanças cirúrgicas, execução orientada a objetivo — contextualizada para build/deploy real), ambas sem `paths:` + `apex.md`, `lwc.md`, `metadata.md`, escopadas por `paths:`. | As duas primeiras no início da sessão; as outras só quando um arquivo que casa o glob entra em contexto |
-| `skills/fsc-build/`, `skills/fsc-gate/` | Os comandos `/fsc-build` e `/fsc-gate`. | Sob demanda, quando você digita |
+| `skills/sf-build/`, `skills/sf-gate/` | Os comandos `/sf-build` e `/sf-gate`. | Sob demanda, quando você digita |
 | `skills/salesforce/`, `agent-skills/`, `mattpocock/` | As 24 skills importadas. Ficam sob uma pasta de categoria, então **não são invocáveis por `/`** — são documentos de referência que os agentes leem por caminho, de propósito (carregar 26 skills no menu poluiria sem ajudar). | Quando um agente lê o `SKILL.md` que precisa |
 | `settings.json` + `hooks/` | Permissões (o que roda sem perguntar, o que é negado) e o guard de deploy. | Aplicados em toda chamada de ferramenta |
-| `agent-memory/` | Memória persistente de `fsc-declarative-developer` (ARC, Financial Accounts, Highlights Panel — configurações FSC sem skill importada) e `fsc-omnistudio-developer` (contrato Apex Remote confirmado, padrões de layout FlexCard, lifecycle de registros). | Início de cada execução daquele agente |
-| `skills/apex-test-loop/` *(condicional)* | Clonado sozinho pelo `fsc-deploy-gate` só quando um deploy falha por cobertura de Apex insuficiente (org Enterprise exige ≥75%) — ver `.claude/skills/README.md`. Não existe num clone limpo. | Quando o gate detecta esse tipo específico de falha |
+| `agent-memory/` | Memória persistente de `sf-declarative-developer` (ARC, Financial Accounts, Highlights Panel — configurações FSC sem skill importada) e `fsc-omnistudio-developer` (contrato Apex Remote confirmado, padrões de layout FlexCard, lifecycle de registros). | Início de cada execução daquele agente |
+| `skills/apex-test-loop/` *(condicional)* | Clonado sozinho pelo `sf-deploy-gate` só quando um deploy falha por cobertura de Apex insuficiente (org Enterprise exige ≥75%) — ver `.claude/skills/README.md`. Não existe num clone limpo. | Quando o gate detecta esse tipo específico de falha |
 
 ### Comandos
 
 | Comando | O que faz |
 |---|---|
-| `/fsc-build <domínio> <capacidade>` | Constrói e deploya uma capacidade inteira via `fsc-build-orchestrator`, com o portão obrigatório no fim. Sem args, lista domínios/capacidades do BACKLOG.md. |
-| `/fsc-gate <domínio> <capacidade>` | Só re-roda o portão de evidência contra algo já construído: está mesmo deployado, testado e passando? |
-| `/fsc-status` | Mostra onde cada capacidade está no pipeline SDD — o que está especificado, prototipado, pronto para build, e o que está bloqueado. |
+| `/sf-build <domínio> <capacidade>` | Constrói e deploya uma capacidade inteira via `sf-build-orchestrator`, com o portão obrigatório no fim. Sem args, lista domínios/capacidades do BACKLOG.md. |
+| `/sf-gate <domínio> <capacidade>` | Só re-roda o portão de evidência contra algo já construído: está mesmo deployado, testado e passando? |
+| `/sf-status` | Mostra onde cada capacidade está no pipeline SDD — o que está especificado, prototipado, pronto para build, e o que está bloqueado. |
 
 ### O que o `settings.json` impede na prática
 
 Permissões cobrem o óbvio (`sf org delete`, `sf data delete`, `rm -rf`, `git push --force`, leitura de `.env`/`*.key` negados; comandos `sf` de leitura e os testes pré-aprovados). O hook `.claude/hooks/guard-deploy.mjs` cobre os casos que **derrotariam o portão de evidência em silêncio, ou fugiriam do escopo exato pedido** — e por isso são bloqueio, não prosa:
 
 - `--ignore-errors`/`--ignore-warnings` num deploy (esconde falha real);
-- deploy com teste (`--test-level` diferente de `NoTestRun`) sem `FSC_HEAVY_TESTS_APPROVED=1` (pula a aprovação explícita do modo pesado);
+- deploy com teste (`--test-level` diferente de `NoTestRun`) sem `SF_HEAVY_TESTS_APPROVED=1` (pula a aprovação explícita do modo pesado);
 - `--source-dir force-app` inteiro (reacopla os domínios, que são fronteiras de deploy independentes);
 - `--source-dir` em deploy de ciclo rápido (`--test-level NoTestRun`) — esse modo é sempre `--metadata <Tipo>:<Nome>`, nunca pasta inteira (ver "Deploying an artifact" em `.claude/rules/journey-developer.md`);
 - `sf org delete` / `sf data delete`;
-- deploy/teste sem `--target-org`, ou apontado para uma org diferente de `$FSC_TARGET_ORG` (ver Instalação).
+- deploy/teste sem `--target-org`, ou apontado para uma org diferente de `$SF_TARGET_ORG` (ver Instalação).
 
 Comandos de mutação real (`sf project deploy start` sem `--dry-run`, `sf data create record`, `sf org assign permset`) disparam prompt de permissão — são checkpoints humanos na mutação do org, não falhas. Leitura, dry-run, scans e testes são pré-aprovados.
 
@@ -134,7 +134,7 @@ Está em Node porque Node ≥20 já é pré-requisito e se comporta igual no Win
 
 ### Dispatch envelope
 
-Quando `fsc-build-orchestrator` despacha um especialista, ele passa um envelope estruturado — nunca só "leia architecture.md":
+Quando `sf-build-orchestrator` despacha um especialista, ele passa um envelope estruturado — nunca só "leia architecture.md":
 
 ```
 {
@@ -146,7 +146,7 @@ Quando `fsc-build-orchestrator` despacha um especialista, ele passa um envelope 
 }
 ```
 
-Cada especialista também declara o que **não** faz — permission sets são exclusividade de `fsc-data-model-developer`, Named Credentials de `fsc-integration-developer`, FlexCard placement de `fsc-declarative-developer`. Isso evita sobreposição de responsabilidades.
+Cada especialista também declara o que **não** faz — permission sets são exclusividade de `sf-data-model-developer`, Named Credentials de `sf-integration-developer`, FlexCard placement de `sf-declarative-developer`. Isso evita sobreposição de responsabilidades.
 
 ### Report contract dos especialistas
 
@@ -193,9 +193,9 @@ Quando o gate falha, ele produz um relatório estruturado:
 {
   phase: "2-validate-deploy",
   failing-artifact: "MyService.cls",
-  owning-agent: "fsc-apex-developer",
+  owning-agent: "sf-apex-developer",
   error-evidence: "Compile error: Method does not exist: AccountService.getById()",
-  suggested-fix: "Verificar se fsc-data-model-developer criou o campo ExtId__c"
+  suggested-fix: "Verificar se sf-data-model-developer criou o campo ExtId__c"
 }
 ```
 
@@ -206,20 +206,20 @@ O orquestrador usa `owning-agent` para re-invocar o especialista correto. Falhas
 ```
 specs/<domínio>/<NNN>-<slug>/ inteira    (produzida pelo Designer, já validada com o negócio)
         ↓
-fsc-build-orchestrator: lê 100%, valida status, monta dispatch envelope
+sf-build-orchestrator: lê 100%, valida status, monta dispatch envelope
         ↓
 modelo de dados → integração → Apex → LWC → OmniStudio → declarativo → Flow
         ↓                                              (cada um com report contract)
-fsc-deploy-gate: scan → manifest check → validar → deploy → testar → verificar acesso
+sf-deploy-gate: scan → manifest check → validar → deploy → testar → verificar acesso
         ↓                                              (failure report estruturado)
 docs/sdd/BACKLOG.md atualizado + build-report.md com pipeline status
 ```
 
-Uma capacidade só é dada como "construída" quando `fsc-deploy-gate` reporta cada fase com evidência executável (job id do deploy, id da execução de teste, cobertura real, contagem de findings de scan) — nunca por um agente declarar "deveria funcionar" sem rodar o comando que prova isso.
+Uma capacidade só é dada como "construída" quando `sf-deploy-gate` reporta cada fase com evidência executável (job id do deploy, id da execução de teste, cobertura real, contagem de findings de scan) — nunca por um agente declarar "deveria funcionar" sem rodar o comando que prova isso.
 
 ## Sobre as 26 skills importadas — resumo
 
-19 vêm de [`forcedotcom/sf-skills`](https://github.com/forcedotcom/sf-skills) (oficiais da Salesforce, Apache-2.0) — as 6 que o Designer já usa para prototipar, mais 13 novas específicas de build/deploy real (teste Apex, deploy via `sf`, scan estático, permission set, Flow, SOQL, modelo de dados, segurança/acessibilidade de LWC, integração/Named Credential/Platform Event, montagem de Lightning Record Page). As outras 5 (3 + 2) são disciplina de engenharia curada seletivamente de dois repositórios que também inspiraram este projeto — [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) e [`mattpocock/skills`](https://github.com/mattpocock/skills) — nenhum deles é específico de Salesforce, então nenhum foi adotado por inteiro como dependência dos 9 agentes: de cada um foi curado só o subconjunto que realmente reforça um pipeline de deploy real (a disciplina de evidência `CHECK:`/`EXPECT:`/`ABANDON:`, herdada do `unlazy`, vive inlineada em prosa no `fsc-deploy-gate`, sem diretório vendored). A análise completa, skill por skill, está em [`.claude/skills/README.md`](.claude/skills/README.md).
+19 vêm de [`forcedotcom/sf-skills`](https://github.com/forcedotcom/sf-skills) (oficiais da Salesforce, Apache-2.0) — as 6 que o Designer já usa para prototipar, mais 13 novas específicas de build/deploy real (teste Apex, deploy via `sf`, scan estático, permission set, Flow, SOQL, modelo de dados, segurança/acessibilidade de LWC, integração/Named Credential/Platform Event, montagem de Lightning Record Page). As outras 5 (3 + 2) são disciplina de engenharia curada seletivamente de dois repositórios que também inspiraram este projeto — [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) e [`mattpocock/skills`](https://github.com/mattpocock/skills) — nenhum deles é específico de Salesforce, então nenhum foi adotado por inteiro como dependência dos 9 agentes: de cada um foi curado só o subconjunto que realmente reforça um pipeline de deploy real (a disciplina de evidência `CHECK:`/`EXPECT:`/`ABANDON:`, herdada do `unlazy`, vive inlineada em prosa no `sf-deploy-gate`, sem diretório vendored). A análise completa, skill por skill, está em [`.claude/skills/README.md`](.claude/skills/README.md).
 
 ---
 
@@ -227,8 +227,8 @@ Uma capacidade só é dada como "construída" quando `fsc-deploy-gate` reporta c
 
 | | |
 |---|---|
-| **Input** | A pasta `specs/<domínio>/<NNN>-<slug>/` **inteira**, já produzida pelo Designer, com status pelo menos "pronto para build" em `docs/sdd/BACKLOG.md` — `spec.md`, `plan.md`, `tasks.md`, `architecture.md`, `prototype/`. `fsc-build-orchestrator` lê essa pasta 100%, não só `tasks.md`/`architecture.md`. |
-| **O que faz** | Despacha 7 especialistas com dispatch envelope estruturado em ordem de dependência — `fsc-data-model-developer` → `fsc-integration-developer` → `fsc-apex-developer` → `fsc-lwc-developer` → `fsc-omnistudio-developer` → `fsc-declarative-developer` → `fsc-automation-developer` — cada um com report contract padronizado. Por fim roda `fsc-deploy-gate`, obrigatório: scan estático → manifest completeness → deploy validado → deploy real → teste Apex com cobertura → checagem de LWC (Jest/segurança/acessibilidade) → verificação de acesso → relatório pós-deploy. Cada fase exige evidência executável (comando, exit code, campo do JSON); falhas produzem relatório estruturado `{phase, owning-agent, error-evidence}`. |
+| **Input** | A pasta `specs/<domínio>/<NNN>-<slug>/` **inteira**, já produzida pelo Designer, com status pelo menos "pronto para build" em `docs/sdd/BACKLOG.md` — `spec.md`, `plan.md`, `tasks.md`, `architecture.md`, `prototype/`. `sf-build-orchestrator` lê essa pasta 100%, não só `tasks.md`/`architecture.md`. |
+| **O que faz** | Despacha 7 especialistas com dispatch envelope estruturado em ordem de dependência — `sf-data-model-developer` → `sf-integration-developer` → `sf-apex-developer` → `sf-lwc-developer` → `fsc-omnistudio-developer` → `sf-declarative-developer` → `sf-automation-developer` — cada um com report contract padronizado. Por fim roda `sf-deploy-gate`, obrigatório: scan estático → manifest completeness → deploy validado → deploy real → teste Apex com cobertura → checagem de LWC (Jest/segurança/acessibilidade) → verificação de acesso → relatório pós-deploy. Cada fase exige evidência executável (comando, exit code, campo do JSON); falhas produzem relatório estruturado `{phase, owning-agent, error-evidence}`. |
 | **Entrega** | Metadado Salesforce real em `force-app/domains/<domínio>/main/default/` **deployado e verificado num org de verdade** — objetos/campos/permission sets, Apex + teste, LWC de produção, FlexCard/OmniScript (como registro de sObject), Flow, Named Credential/Platform Event, montagem de página. Mais `specs/<domínio>/<NNN>-<slug>/build-report.md` (evidência + pipeline status) e `docs/sdd/BACKLOG.md` atualizado para "construído e deployado". |
 
 ---

@@ -1,5 +1,5 @@
 ---
-name: fsc-gate
+name: sf-gate
 description: Re-run the evidence gate against an already-built capability and report whether it is really deployed, tested and passing.
 argument-hint: <domain> <capability>
 arguments: [domain, capability]
@@ -11,7 +11,7 @@ disable-model-invocation: true
 Run the evidence gate against the capability **`$capability`** in domain **`$domain`**,
 standalone — no building, no fixing.
 
-Dispatch the `fsc-deploy-gate` subagent for it. That agent owns the phases and their exact
+Dispatch the `sf-deploy-gate` subagent for it. That agent owns the phases and their exact
 commands. Its own scope note applies: FlexCard/OmniScript are verified as `OmniUiCard`/
 `OmniProcess` records with `IsActive = true` via `sf data query`, not by a deploy job id.
 

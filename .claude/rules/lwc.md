@@ -4,7 +4,7 @@ paths: force-app/**/lwc/**, force-app/**/messageChannels/**
 
 # LWC in this project
 
-Full authoring guidance lives in `fsc-lwc-developer` and the skills it names — this file is
+Full authoring guidance lives in `sf-lwc-developer` and the skills it names — this file is
 only what must hold for any LWC file touched here, by any agent.
 
 - **The prototype is the design source of truth, not a draft to re-flatten.** Carry over its

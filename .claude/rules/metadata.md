@@ -4,8 +4,8 @@ paths: force-app/**/objects/**, force-app/**/permissionsets/**, force-app/**/fle
 
 # Declarative and configuration metadata
 
-Full authoring guidance lives in `fsc-data-model-developer`, `fsc-integration-developer`,
-`fsc-declarative-developer` and `fsc-automation-developer` — this file is only what must
+Full authoring guidance lives in `sf-data-model-developer`, `sf-integration-developer`,
+`sf-declarative-developer` and `sf-automation-developer` — this file is only what must
 hold for any metadata file touched here.
 
 - **SFDX source format shapes the path.** A custom field is its own file at

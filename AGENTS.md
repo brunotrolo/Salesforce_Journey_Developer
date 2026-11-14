@@ -20,7 +20,7 @@ years.
 project's code.
 
 This repo already delegates to subagents: `.claude/agents/` holds 9 authored agents (an
-orchestrator, 7 specialists and `fsc-deploy-gate`), not a flat single-agent setup. Real
+orchestrator, 7 specialists and `sf-deploy-gate`), not a flat single-agent setup. Real
 deploys and test runs go through the `sf` CLI directly — deliberately, not via an MCP
 abstraction. Same reasoning as the deploy-guard pattern: a real-mutation command needs
 explicit, inspectable flags (`--target-org`, `--metadata <Type>:<Name>`, `--test-level`) that
@@ -47,8 +47,8 @@ the skill's execution:
 ## Non-negotiable rules
 
 ### 1. Authored vs. imported content
-- **Authored** (`.claude/agents/`, `.claude/rules/`, `.claude/skills/fsc-build`,
-  `.claude/skills/fsc-gate`): this is where the project's knowledge lives. Edit freely,
+- **Authored** (`.claude/agents/`, `.claude/rules/`, `.claude/skills/sf-build`,
+  `.claude/skills/sf-gate`): this is where the project's knowledge lives. Edit freely,
   within the rules below.
 - **Imported** (`.claude/skills/salesforce`, `.claude/skills/agent-skills`,
   `.claude/skills/mattpocock`): third-party, each carrying its own LICENSE/NOTICE.
@@ -72,7 +72,7 @@ already delivers them. Don't add reference lines, and don't restate a rule's con
 an agent.
 
 ### 4. Nothing is "built" without evidence
-This is the project's spine, stated in `journey-developer.md`: `fsc-deploy-gate` is the only
+This is the project's spine, stated in `journey-developer.md`: `sf-deploy-gate` is the only
 authority on whether a capability is deployed, and evidence means the cited command, its
 exit code, and the field from its JSON output. When you write instructions for any agent,
 never introduce a phrasing that would let "the command didn't error" count as proof.
@@ -97,8 +97,8 @@ placeholders everywhere.
 
 This includes **org aliases and internal naming conventions**, which are the easy ones to
 miss because they look like configuration rather than content. The deploy target is read
-from the `FSC_TARGET_ORG` env var and no alias is hardcoded anywhere; the permission-set
-convention in `.claude/skills/fsc-build/references/permissionamento-v2.md` carries the
+from the `SF_TARGET_ORG` env var and no alias is hardcoded anywhere; the permission-set
+convention in `.claude/skills/sf-build/references/permissionamento-v2.md` carries the
 formula and the checklist but no project's product vocabulary. Keep both that way.
 
 ## Repository map
@@ -112,7 +112,7 @@ formula and the checklist but no project's product vocabulary. Keep both that wa
 │   ├── karpathy-guidelines.md  # always-on: behavioral discipline (MIT)
 │   ├── apex.md / lwc.md / metadata.md   # path-scoped
 ├── skills/
-│   ├── fsc-build, fsc-gate     # authored references
+│   ├── sf-build, sf-gate     # authored references
 │   └── salesforce, agent-skills, mattpocock   # imported, third-party
 ├── hooks/guard-deploy.mjs      # deploy safety boundary
 └── settings.json               # permissions
@@ -136,7 +136,7 @@ force-app/               # layout skeleton the agents write into
   mechanism, not a style guide — its `RULES` array mechanically denies the Bash commands that
   would defeat the evidence gate or the per-domain deploy boundary (missing/wrong
   `--target-org`, `--ignore-errors`/`--ignore-warnings`, heavy runs without
-  `FSC_HEAVY_TESTS_APPROVED=1`, a whole-`force-app` deploy, and a `NoTestRun` sandbox deploy
+  `SF_HEAVY_TESTS_APPROVED=1`, a whole-`force-app` deploy, and a `NoTestRun` sandbox deploy
   using `--source-dir` instead of `--metadata <Type>:<Name>`). A specialist report is not
   "done" on an unerrored command; it is done when the gate cites the command, its exit code
   and the JSON field that proves the outcome.

@@ -5,7 +5,7 @@ material de terceiros sob as licenças originais.
 
 O conteúdo **autoral** deste repositório são os 9 agentes em `.claude/agents/`, as rules em
 `.claude/rules/` (exceto `karpathy-guidelines.md`, derivada — ver abaixo) e as skills
-`fsc-build/` e `fsc-gate/`. Todo o resto sob `.claude/skills/` é importado.
+`sf-build/` e `sf-gate/`. Todo o resto sob `.claude/skills/` é importado.
 
 ## Skills importadas
 
@@ -20,7 +20,7 @@ quais skills foram importadas, de onde, e qual agente cita cada uma — está em
 | `.claude/skills/mattpocock/` | [mattpocock/skills](https://github.com/mattpocock/skills) | MIT (`LICENSE` incluso) |
 | `.claude/skills/apex-test-loop/` *(condicional)* | [brunotrolo/Salesforce-Apex-Cover-Loop](https://github.com/brunotrolo/Salesforce-Apex-Cover-Loop) | MIT (+ Apache-2.0 no que ela embute) |
 
-`apex-test-loop/` **não vem num clone limpo** — o `fsc-deploy-gate` a clona sob demanda,
+`apex-test-loop/` **não vem num clone limpo** — o `sf-deploy-gate` a clona sob demanda,
 apenas quando um deploy falha por cobertura de Apex insuficiente.
 
 ## Karpathy Guidelines — MIT

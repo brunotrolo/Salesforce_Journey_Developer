@@ -112,7 +112,7 @@ For multi-step tasks, state a brief plan:
 Strong success criteria let you loop independently. Weak criteria ("make it work") require
 constant clarification.
 
-> **In this project.** `fsc-deploy-gate` is this guideline implemented as an agent, and
+> **In this project.** `sf-deploy-gate` is this guideline implemented as an agent, and
 > the `CHECK:`/`EXPECT:`/`ABANDON:` markers are the plan format above. The rule that
 > matters most is the one about **weak criteria**: *"the deploy command didn't error"* and
 > *"the code looks right"* are precisely the weak criteria Karpathy warns about — they feel

@@ -1,6 +1,6 @@
 # Permissionamento — padrão de nomenclatura (condensado operacional)
 
-Toda permissão criada por `fsc-data-model-developer` segue este padrão. Se o projeto tiver
+Toda permissão criada por `sf-data-model-developer` segue este padrão. Se o projeto tiver
 um guia de permissionamento próprio, **ele é a autoridade final** e o vocabulário de
 produto abaixo deve ser substituído pelo dele; este arquivo é o mínimo acionável para
 nomear sem erro.
@@ -50,7 +50,7 @@ CP_<Produto>_Admin
 
 - **Granularidade:** uma permissão por operação — nunca `AcessoTotal` genérico.
 - **Custom Permission referencia um Permission Set específico** — declarar o vínculo no `build-report.md`.
-- **Teste negativo obrigatório:** ao menos 1 teste com usuário **sem** o PS provando que a restrição funciona (ver `fsc-apex-developer`, Rec 11).
+- **Teste negativo obrigatório:** ao menos 1 teste com usuário **sem** o PS provando que a restrição funciona (ver `sf-apex-developer`, Rec 11).
 - **Menor privilégio:** conceder apenas o necessário; revisar/remover permissões não utilizadas.
 
 ## Checklist de criação (toda permissão, sem exceção)

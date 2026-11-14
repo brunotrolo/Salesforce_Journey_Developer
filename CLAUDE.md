@@ -18,7 +18,7 @@ The essentials, in three lines:
 - **Subagents** (`.claude/agents/*.md`) use `name`, `description`, `tools`, optionally
   `model` and `memory`. This is **not** the skill frontmatter: a `SKILL.md` uses
   `allowed-tools`. Swapping one for the other is silently ignored.
-- **Agent memory:** `fsc-declarative-developer` and `fsc-omnistudio-developer` declare
+- **Agent memory:** `sf-declarative-developer` and `fsc-omnistudio-developer` declare
   `memory: project`, which auto-loads `.claude/agent-memory/<agent-name>/MEMORY.md`. That
   exact path is what the harness reads — a `MEMORY.md` anywhere else is never loaded.
 - **Rules auto-load.** `journey-developer.md` and `karpathy-guidelines.md` are
