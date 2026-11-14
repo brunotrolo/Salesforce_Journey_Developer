@@ -18,7 +18,7 @@ Subagentes do Claude Code, cada um consumindo um subconjunto das skills em `.cla
 
 Peça pelo **domínio + capacidade**, exatamente como no Designer — a capacidade já precisa ter `tasks.md`/`architecture.md`:
 
-> "Use o sf-build-orchestrator para construir e deployar `atendimento` 001"
+> `/sf-build atendimento 001`  (a orquestração roda na conversa principal; subagentes não chamam outros subagentes)
 
 O orquestrador roda, por capacidade:
 1. Confere `docs/sdd/BACKLOG.md` — status precisa ser "pronto para build" (o Designer já terminou spec/design/protótipo/plano técnico).

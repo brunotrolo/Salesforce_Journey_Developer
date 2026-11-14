@@ -10,8 +10,12 @@ disable-model-invocation: true
 
 Build and deploy the capability **`$capability`** in domain **`$domain`**.
 
-Dispatch the `sf-build-orchestrator` subagent for it. That agent owns the whole procedure —
-do not re-derive it here, and do not build anything yourself in the main context.
+Run the procedure in `.claude/agents/sf-build-orchestrator.md` yourself, in the main
+conversation: read it first and follow it step by step. Subagents cannot launch other
+subagents or ask the user questions, so the orchestration stays here and you dispatch each
+specialist (`sf-data-model-developer`, `sf-apex-developer`, …) with the Agent tool. Do not
+hand the whole orchestration to a single subagent, and do not author metadata yourself —
+that is the specialists' job.
 
 ## Dois modos: desenvolvimento rápido vs finalização
 

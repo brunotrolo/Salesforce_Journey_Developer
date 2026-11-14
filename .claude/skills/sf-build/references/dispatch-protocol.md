@@ -4,7 +4,7 @@ Detail the orchestrator agent points to. One definition lives here; README and a
 
 ## Dispatch envelope (single version)
 
-Every specialist receives, in the prompt of the `Task` call:
+Every specialist receives, in the prompt of the `Agent` call:
 
 ```
 { capability-path, metadata-root, relevant-tasks: [...], relevant-objects: [...],
