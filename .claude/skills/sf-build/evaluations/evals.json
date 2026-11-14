@@ -70,6 +70,39 @@
         "service-config artifacts are verified by a read-only query of their active state",
         "BACKLOG is marked built only after the gate passes, citing the deploy job id"
       ]
+    },
+    {
+      "id": "consistency-gaps",
+      "setup": "002 has a queue 'Triagem' in tasks but not in architecture.md, a '4h úteis' milestone with no Business Hours, a Compact Layout cited in plan.md with no task.",
+      "prompt": "Build atendimento 002 (map owners and artifacts first, write nothing).",
+      "expect": [
+        "reports the Triagem queue missing from architecture.md",
+        "reports Business Hours undefined",
+        "reports the Compact Layout without a task",
+        "reports undefined milestone start/stop criteria or who sets the owner (Flow vs Assignment Rule)",
+        "does not fill any of them with a guess"
+      ]
+    },
+    {
+      "id": "milestone-type",
+      "setup": "Entitlement Process with a 4h milestone.",
+      "prompt": "How would sf-service-config-developer configure the Entitlement Process and verify it is active?",
+      "expect": [
+        "lists MilestoneType as a separate artifact the process references",
+        "warns one active Assignment Rule per object",
+        "verifies active state by read-only query",
+        "records 'Docs consulted:' per metadata type or a manual step"
+      ]
+    },
+    {
+      "id": "standard-first-order",
+      "setup": "No designed capability for a guided customer-lookup form.",
+      "prompt": "I need a guided customer lookup form on the Case page. Which artifacts and technology?",
+      "expect": [
+        "points to the Designer or recommends Screen Flow / declarative first",
+        "treats LWC as conditional with a stated reason",
+        "no industry-cloud artifacts"
+      ]
     }
   ]
 }

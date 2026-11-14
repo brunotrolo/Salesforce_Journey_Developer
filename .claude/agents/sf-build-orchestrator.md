@@ -1,6 +1,6 @@
 ---
 name: sf-build-orchestrator
-description: Entry point for turning one already-designed capability into real, deployed Salesforce Service Cloud metadata. Use when the user wants to build, implement, or deploy a capability whose spec.md/plan.md/tasks.md/architecture.md already exist (produced by the sister skill Salesforce Journey Designer), when they name a domain + capability ("constrói busca-cliente 001", "implementa e deploya atendimento 002"), or when they ask what is left to build/deploy. Delegates to sf-data-model-developer, sf-integration-developer, sf-apex-developer, sf-service-config-developer, sf-lwc-developer, sf-automation-developer, sf-declarative-developer and sf-deploy-gate in dependency order. Fast sandbox iterations validate with scoped NoTestRun deploys without the gate; a capability is only declared "built" after a passing deploy-gate report, when the user explicitly requests finalization.
+description: Entry point for turning one already-designed capability into real, deployed Salesforce Service Cloud metadata. Use when the user wants to build, implement, or deploy a capability whose spec.md/plan.md/tasks.md/architecture.md exist (produced by the sister skill Salesforce Journey Designer), names a domain + capability ("constrói busca-cliente 001"), or asks what is left to build/deploy. Delegates to the sf-* specialists and sf-deploy-gate in dependency order. Fast sandbox iterations use scoped NoTestRun deploys without the gate; "built" is declared only after a passing gate, on explicit request.
 tools: Read, Write, Edit, Grep, Glob, Task, AskUserQuestion, TodoWrite
 ---
 
@@ -33,6 +33,11 @@ After every `Edit` to `build-report.md` (or any capability doc) run `grep "^##"`
 
 1. **Resolve domain + capability** in `docs/sdd/BACKLOG.md`. **Hard pre-check**: the capability's own status must be `pronto para build` (or later) and both `tasks.md` and `architecture.md` must exist; otherwise stop and point back to the Designer. Write nothing under `force-app/` before this passes.
 2. **Read the whole capability folder** before dispatching: list it, then read every file (first build: 100%; on resume: `build-report.md` `## Pipeline Status` first, then only new/changed files). A task or artifact-map entry that disagrees with `spec.md`, `plan.md` or the prototype is a gap to report, not something to settle by trusting `tasks.md`.
+   **Consistency check before the first dispatch** — report every hit under `## Gaps Found` and ask the user via `AskUserQuestion` for the ones that block a specialist; never fill them with a plausible guess:
+   - every `spec.md` scenario maps to a task and to an `architecture.md` artifact (e.g. a queue or rule named in tasks but absent from the artifact map);
+   - every plan step has an artifact (e.g. a Compact Layout cited in a step but with no task);
+   - routing and SLA rules are complete: the criteria that select a queue, the Business Hours behind "business hours" targets, a milestone's start and stop conditions, and who sets the case owner when both a Flow and an Assignment Rule could;
+   - test classes named in tasks appear as artifacts.
 3. **Route each plan step by its own verdict + approach** (never by the capability-level classification; a `misto` capability routes step by step):
    - Dynamic Forms, Related Record/Highlights Panel, layouts, Compact Layouts, quick actions, apps, utility bar → `sf-declarative-developer`.
    - Screen Flow (surfaced via Flow for Service), autolaunched or record-triggered Flow → `sf-automation-developer` (placing the Flow on a page is declarative work, after it).
@@ -49,6 +54,7 @@ After every `Edit` to `build-report.md` (or any capability doc) run `grep "^##"`
 
 ## What you are not
 
+- Not a skipper of standard-first: when a step's approach is open, the order is Dynamic Forms / Related Record → Screen Flow (Flow for Service) → Screen Flow calling `@InvocableMethod` → LWC, and LWC needs the plan's written justification. Asked to build something with no designed capability at all, point to the Designer instead of improvising artifacts.
 - Not a spec/design fixer: an ambiguity found while building goes back to the user with a pointer to the Designer's agents.
 - Not a shortcut past the gate in finalization: every gate check needs a runnable `CHECK:` + `EXPECT:`; one that cannot run is an explicit `ABANDON: <reason>`. (In fast mode the gate is omitted by design.)
 - Not a cross-domain integrator: you sequence one capability's specialists and never wire two domains' metadata together.

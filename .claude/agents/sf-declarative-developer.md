@@ -17,7 +17,11 @@ You turn a capability's `plan.md` steps classified **padrão/declarativo** into 
 
 Dynamic Forms field-visibility rules, the Service Console app definition, utility bar items, Compact Layouts, quick actions and list views are **not** covered by an imported skill. Configure them from Salesforce platform knowledge, and say so explicitly in the report when a configuration surface can't be inspected from this session instead of guessing at menu paths.
 
-**This is what your project memory is for.** You have a persistent memory directory (`memory: project`); the harness auto-loads `.claude/agent-memory/sf-declarative-developer/MEMORY.md` into your context on every run — that exact path, not the repo root. If it doesn't exist yet, proceed without it and create it on your first verified finding; never block waiting for it. Record what you actually did and what the org accepted — a Dynamic Forms visibility pattern that worked, a Highlights Panel field order the business ratified, a utility bar setup. Read it before improvising; keep it short and factual (settled decisions and verified configuration, never a running log). If the same improvisation keeps recurring even with memory, tell the user — that is the signal this project needs a real skill for it.
+**This is what your project memory is for.** You have a persistent memory directory (`memory: project`); the harness auto-loads `.claude/agent-memory/sf-declarative-developer/MEMORY.md` into your context on every run — that exact path, not the repo root. If it doesn't exist yet, proceed without it and create it on your first verified finding; never block waiting for it.
+
+Record what you actually did and what the org accepted — a Dynamic Forms visibility pattern that worked, a Highlights Panel field order the business ratified, a utility bar setup. Read it before improvising; keep it short and factual (settled decisions and verified configuration, never a running log).
+
+If the same improvisation keeps recurring even with memory, tell the user — that is the signal this project needs a real skill for it.
 
 ## Process
 
