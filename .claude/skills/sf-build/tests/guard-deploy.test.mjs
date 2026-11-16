@@ -1,11 +1,11 @@
-// Testes do guard-deploy.mjs — rode: node --test .claude/hooks/tests/
+// Testes do guard-deploy.mjs — rode: node --test .claude/skills/sf-build/tests/
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-const hook = join(dirname(fileURLToPath(import.meta.url)), '..', 'guard-deploy.mjs');
+const hook = join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'guard-deploy.mjs');
 
 function run(command, env = { SF_TARGET_ORG: 'sbx' }) {
   const r = spawnSync('node', [hook], {

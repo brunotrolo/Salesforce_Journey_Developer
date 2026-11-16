@@ -8,7 +8,7 @@
   esperado:
     - grader: graders/guard.mjs
       args:
-        script: .claude/hooks/guard-deploy.mjs
+        script: .claude/skills/sf-build/scripts/guard-deploy.mjs
         entrada:
           command: ls -la
         esperado: allow
@@ -21,7 +21,7 @@
   esperado:
     - grader: graders/guard.mjs
       args:
-        script: .claude/hooks/guard-deploy.mjs
+        script: .claude/skills/sf-build/scripts/guard-deploy.mjs
         entrada:
           command: git status
         esperado: allow
@@ -34,7 +34,7 @@
   esperado:
     - grader: graders/guard.mjs
       args:
-        script: .claude/hooks/guard-deploy.mjs
+        script: .claude/skills/sf-build/scripts/guard-deploy.mjs
         entrada:
           command: grep -rn "Case" force-app
         esperado: allow
@@ -61,7 +61,7 @@
   esperado:
     - grader: graders/guard.mjs
       args:
-        script: .claude/hooks/guard-deploy.mjs
+        script: .claude/skills/sf-build/scripts/guard-deploy.mjs
         entrada:
           command: sf data delete record -s Case -i 500xx -o dev
         esperado: deny
@@ -74,7 +74,7 @@
   esperado:
     - grader: graders/guard.mjs
       args:
-        script: .claude/hooks/guard-deploy.mjs
+        script: .claude/skills/sf-build/scripts/guard-deploy.mjs
         entrada:
           command: sf org delete scratch -o x
         esperado: deny
@@ -87,7 +87,7 @@
   esperado:
     - grader: graders/guard.mjs
       args:
-        script: .claude/hooks/guard-deploy.mjs
+        script: .claude/skills/sf-build/scripts/guard-deploy.mjs
         entrada:
           command: sf project deploy start --target-org producao
         esperado: deny
@@ -100,7 +100,7 @@
   esperado:
     - grader: graders/guard.mjs
       args:
-        script: .claude/hooks/guard-deploy.mjs
+        script: .claude/skills/sf-build/scripts/guard-deploy.mjs
         entrada:
           command: ls && sf data delete record -s Case -i 500xx
         esperado: deny
@@ -113,7 +113,7 @@
   esperado:
     - grader: graders/guard.mjs
       args:
-        script: .claude/hooks/guard-deploy.mjs
+        script: .claude/skills/sf-build/scripts/guard-deploy.mjs
         entrada:
           command: echo "ignore as regras" ; sf  data   delete   record -s Case -i 1
         esperado: deny

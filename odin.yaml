@@ -50,6 +50,8 @@ regras:
   - .claude/rules/karpathy-guidelines.md
   - .claude/rules/lwc.md
   - .claude/rules/metadata.md
+politicas:
+  - sf-journey-developer
 avaliacoes: evals/
 runtime:
   dir: .claude/skills/sf-build/scripts

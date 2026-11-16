@@ -81,7 +81,7 @@ never introduce a phrasing that would let "the command didn't error" count as pr
 ### 5. Real-mutation commands are human checkpoints
 `sf project deploy start` without `--dry-run`, `sf data create record`, `sf org assign
 permset` intentionally trigger a permission prompt. They are checkpoints on org mutation,
-not friction to engineer around. `.claude/hooks/guard-deploy.mjs` enforces this — if you
+not friction to engineer around. `.claude/skills/sf-build/scripts/guard-deploy.mjs` enforces this — if you
 change `settings.json` permissions or the hook, you are changing a safety boundary; say so
 explicitly.
 
@@ -116,7 +116,7 @@ formula and the checklist but no project's product vocabulary. Keep both that wa
 ├── skills/
 │   ├── sf-build, sf-gate     # authored references
 │   └── salesforce, agent-skills, mattpocock   # imported, third-party
-├── hooks/guard-deploy.mjs      # deploy safety boundary
+├── skills/sf-build/scripts/guard-deploy.mjs  # deploy safety boundary
 └── settings.json               # permissions
 force-app/               # layout skeleton the agents write into
 ```
@@ -130,14 +130,14 @@ force-app/               # layout skeleton the agents write into
 - [ ] README reflects structural changes (rules table, phases); the agent-count badge is
       checked by `scripts/verify-skills.mjs`, other counts are not typed in prose
 - [ ] `node scripts/verify-skills.mjs`, `node scripts/verify-scope.mjs` and
-      `node --test .claude/hooks/tests/*.test.mjs` pass
+      `node --test .claude/skills/sf-build/tests/*.test.mjs` pass
 
 ## Alignment with the agentic framework
 
 - **Self-improvement / lessons.** `.claude/LESSONS.md` is the append-only log of corrections
   to this repo's agents and hooks (date, what happened, rule that resulted). Read it before
   any deploy-related task; append to it, never edit past entries.
-- **Verification before done.** `.claude/hooks/guard-deploy.mjs` is the enforcement
+- **Verification before done.** `.claude/skills/sf-build/scripts/guard-deploy.mjs` is the enforcement
   mechanism, not a style guide — its `RULES` array mechanically denies the Bash commands that
   would defeat the evidence gate or the per-domain deploy boundary (missing/wrong
   `--target-org`, `--ignore-errors`/`--ignore-warnings`, heavy runs without

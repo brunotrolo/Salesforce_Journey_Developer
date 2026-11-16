@@ -26,5 +26,5 @@ The essentials, in three lines:
   deliberately don't cross-reference them — the mechanism already delivers them.
 - **Imported skills** (`skills/salesforce`, `skills/agent-skills`, `skills/mattpocock`) are
   third-party, consulted by path. Don't rewrite them.
-- **Deploy safety:** `.claude/hooks/guard-deploy.mjs` plus `settings.json` permissions make
+- **Deploy safety:** `.claude/skills/sf-build/scripts/guard-deploy.mjs` plus `settings.json` permissions make
   real-mutation `sf` commands prompt on purpose. Changing either changes a safety boundary.

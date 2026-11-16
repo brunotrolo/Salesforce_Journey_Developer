@@ -41,7 +41,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/guard-deploy.mjs\"",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/skills/sf-build/scripts/guard-deploy.mjs\"",
             "timeout": 15
           }
         ]
@@ -51,7 +51,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/guard-test-content.mjs\"",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/skills/sf-build/scripts/guard-test-content.mjs\"",
             "timeout": 15
           }
         ]

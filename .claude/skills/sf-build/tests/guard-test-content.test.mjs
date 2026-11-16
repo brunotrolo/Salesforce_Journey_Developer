@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-const hook = join(dirname(fileURLToPath(import.meta.url)), '..', 'guard-test-content.mjs');
+const hook = join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'guard-test-content.mjs');
 const decide = (file_path, content) => {
   const r = spawnSync('node', [hook], { input: JSON.stringify({ tool_input: { file_path, content } }), encoding: 'utf8' });
   assert.equal(r.status, 0);

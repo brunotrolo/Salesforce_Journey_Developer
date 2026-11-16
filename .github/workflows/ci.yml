@@ -17,7 +17,7 @@ jobs:
       - name: Verify Service Cloud scope (no out-of-scope content)
         run: node scripts/verify-scope.mjs
       - name: Hook tests (guard-deploy)
-        run: node --test .claude/hooks/tests/*.test.mjs
+        run: node --test .claude/skills/sf-build/tests/*.test.mjs
       - name: Pre-finalization script smoke
         run: node .claude/skills/sf-build/scripts/pre-finalizacao-check.mjs || [ $? -eq 2 ]
       - name: List discoverable skills (telemetry)

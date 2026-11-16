@@ -132,6 +132,13 @@ const RULES = [
   },
 ];
 
+/** Decisão pura (usada pelo hook original e pela política do Odin): null = segue; senão, o motivo da negação. */
+export function decidirDeploy(command) {
+  if (typeof command !== 'string') return null;
+  const hit = RULES.find((rule) => rule.test(command));
+  return hit ? { decisao: 'negar', motivo: hit.reason } : null;
+}
+
 function deny(reason) {
   process.stdout.write(
     JSON.stringify({
@@ -144,18 +151,17 @@ function deny(reason) {
   );
 }
 
-let raw = '';
-process.stdin.setEncoding('utf8');
-process.stdin.on('data', (chunk) => (raw += chunk));
-process.stdin.on('end', () => {
-  try {
-    const command = JSON.parse(raw)?.tool_input?.command;
-    if (typeof command === 'string') {
-      const hit = RULES.find((rule) => rule.test(command));
-      if (hit) deny(hit.reason);
+if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split(/[\\/]/).pop())) {
+  let raw = '';
+  process.stdin.setEncoding('utf8');
+  process.stdin.on('data', (chunk) => (raw += chunk));
+  process.stdin.on('end', () => {
+    try {
+      const d = decidirDeploy(JSON.parse(raw)?.tool_input?.command);
+      if (d) deny(d.motivo);
+    } catch {
+      // Malformed payload: stay out of the way rather than blocking on a guard bug.
     }
-  } catch {
-    // Malformed payload: stay out of the way rather than blocking on a guard bug.
-  }
-  process.exit(0);
-});
+    process.exit(0);
+  });
+}
