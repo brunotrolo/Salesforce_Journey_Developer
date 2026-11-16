@@ -6,6 +6,9 @@ arguments: [domain, capability]
 disable-model-invocation: true
 ---
 
+> **Primeiro passo (Odin):** rode `odin ensure sf-journey-developer` e só continue se a resposta tiver `"ok": true`.
+
+
 # Build a capability
 
 Build and deploy the capability **`$capability`** in domain **`$domain`**.
