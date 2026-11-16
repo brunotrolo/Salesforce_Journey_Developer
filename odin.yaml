@@ -5,19 +5,26 @@ dominio: salesforce
 dono: mantenedor
 descricao: Constrói uma capacidade completa a partir da spec. Metadados, objetos, Flow, Apex e permissões, com implantação na sandbox e relatório de construção.
 intencoes:
-  - construir a capacidade da spec na sandbox
-  - implementar a jornada completa conforme o plano
-  - desenvolver as tarefas da spec e implantar
-  - criar os metadados, o flow e o apex da capacidade
-  - fazer o build da jornada e gerar o build report
-  - implementar a história ponta a ponta
-  - criar a trigger e a classe de serviço da capacidade
-  - texto: criar só o componente LWC
-    negativa: true
-  - texto: refatorar o callout para a API
-    negativa: true
-  - texto: aumentar a cobertura de teste da classe
-    negativa: true
+  - "construir a capacidade da spec na sandbox"
+  - "implementar a jornada completa conforme o plano"
+  - "desenvolver as tarefas da spec e implantar"
+  - "criar os metadados, o flow e o apex da capacidade"
+  - "fazer o build da jornada e gerar o build report"
+  - "implementar a história ponta a ponta"
+  - "criar a trigger e a classe de serviço da capacidade"
+  - "implementa a capacidade 003 da spec"
+  - "cria os objetos, campos e permission sets da capacidade"
+  - "monta o flow de atendimento conforme a spec"
+  - "faz o deploy da capacidade na sandbox"
+  - "gera o relatório de construção"
+  - "constrói o que está no plano técnico"
+  - "cria as regras de validação da spec"
+  - "implementa as tarefas pendentes da capacidade"
+  - "deixa a capacidade pronta para o QA"
+  - { texto: "criar só o componente LWC", negativa: true }
+  - { texto: "refatorar o callout para a API", negativa: true }
+  - { texto: "aumentar a cobertura de teste da classe", negativa: true }
+  - { texto: "investigar o erro de deploy em produção", negativa: true }
 perfis_sugeridos:
   - dev
   - arquiteto
